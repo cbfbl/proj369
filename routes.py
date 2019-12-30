@@ -2,7 +2,7 @@ from flask import Flask, render_template, session, redirect, url_for, flash,json
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required , current_user
-from backend import backend,db,login_manager
+from backend import backend, db, login_manager
 from backend.forms import RegisterForm,LoginForm
 from backend.models import User
 from flask_jwt_extended import (create_access_token)
@@ -19,7 +19,7 @@ def load_user(username):
     return User.query.get(username)
 
 
-@backend.route('/login',methods=['GET','POST'])
+@backend.route('/login', methods=['GET','POST'])
 def login():
     # form = LoginForm()
     # if form.validate_on_submit():
@@ -61,9 +61,10 @@ def logout():
 @backend.route('/user/<name>',methods=['GET'])
 def get_user(name):
     user = User.query.filter_by(email=name).first()
-    if not user :
+    if not user:
         abort(404)
-    return jsonify({'username':user.username,'email':user.email})
+    return jsonify({'username':user.username, 'email':user.email, 'first_name':user.first_name, 'last_name':user.last_name
+                       , 'birth_date': user.birth_date})
 
 
 @backend.route('/user/new',methods=['POST'])
@@ -91,13 +92,10 @@ def register():
     check_user = User.query.filter_by(username=data['username']).first()
     if check_user:
         return 'Username Taken'
-    new_user = User(username=data['username'],email=data['email'])
+    new_user = User(username=data['username'], email=data['email'], first_name=data['first_name'],
+                    last_name=data['last_name'], birth_date=data['birth_date'])
     new_user.password = data['password']
     db.session.add(new_user)
     db.session.commit()
     return 'Created'
 
-
-@backend.route('/home')
-def home():
-    return 'Welcome Home!'

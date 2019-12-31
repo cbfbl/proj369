@@ -63,8 +63,8 @@ def get_user(name):
     user = User.query.filter_by(email=name).first()
     if not user:
         abort(404)
-    return jsonify({'username':user.username, 'email':user.email, 'first_name':user.first_name, 'last_name':user.last_name
-                       , 'birth_date': user.birth_date})
+    return jsonify({'username':user.username, 'email':user.email,
+                    'first_name':user.first_name, 'last_name':user.last_name})
 
 
 @backend.route('/user/new',methods=['POST'])
@@ -92,7 +92,7 @@ def register():
     check_user = User.query.filter_by(username=data['username']).first()
     if check_user:
         return 'Username Taken'
-    new_user = User(username=data['username'], email=data['email'], first_name=data['first_name'],
+    new_user = User(username=data['username'], email=data['email'], gender=data['gender'], first_name=data['first_name'],
                     last_name=data['last_name'], birth_date=data['birth_date'])
     new_user.password = data['password']
     db.session.add(new_user)

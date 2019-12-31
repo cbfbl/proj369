@@ -8,7 +8,6 @@ class Profile extends Component {
     email: "",
     firstname: "",
     lastname: "",
-    birthday: ""
   };
 
   componentDidMount() {
@@ -27,8 +26,7 @@ class Profile extends Component {
           username: response.data.username,
           email: response.data.email,
           first_name: response.data.first_name,
-          last_name: response.data.last_name,
-          birth_date: response.data.birth_date
+          last_name: response.data.last_name
         });
         console.log(response);
       })
@@ -46,7 +44,6 @@ class Profile extends Component {
             <p>Email: {this.state.email}</p>
             <p>Firstname: {this.state.first_name} </p>
             <p>Lastname:  {this.state.last_name}</p>
-            <p>Birthday: {this.state.birth_date} </p>
           </div>
         </div>
       </div>

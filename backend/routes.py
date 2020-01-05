@@ -5,6 +5,7 @@ from flask_login import UserMixin, LoginManager, login_user, logout_user, login_
 from backend import backend, db, login_manager
 from backend.models import User,Follow,Post
 from flask_jwt_extended import (create_access_token)
+import datetime
 
 db.create_all()
 
@@ -128,8 +129,12 @@ def posts(post_user_id):
 @backend.route('/post/new', methods=['POST'])
 def new_post():
     data = request.get_json()
+    start_date_list = data['start_date'].split('-')
+    end_date_list = data['end_date'].split('-')
+    p_start_date = datetime.datetime(int(start_date_list[0]),int(start_date_list[1]),int(start_date_list[2]))
+    p_end_date = datetime.datetime(int(end_date_list[0]),int(end_date_list[1]),int(end_date_list[2]))
     new_post = Post(user_id=current_user.id, title=data['title'], body=data['body'], \
-                    start_date=data['start_date'], end_date=data['end_date'], \
+                    start_date=p_start_date, end_date=p_end_date, \
                     latitude=data['latitude'], longitude=data['longitude'])
     db.session.add(new_post)
     db.session.commit()
@@ -149,5 +154,15 @@ def delete_user():
         abort(403)
     user = User.query.filter_by(id=current_user.id).first()
     db.session.delete(user)
+    db.session.commit()
+    return "deleted"
+
+@backend.route('/post/delete',methods=['POST'])
+def delete_post():
+    data = request.get_json()
+    if data['current_user_id']!=current_user.id :
+        abort(403)
+    post = Post.query.filter_by(id=data['deleted_post_id']).first()
+    db.session.delete(post)
     db.session.commit()
     return "deleted"

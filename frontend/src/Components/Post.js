@@ -96,8 +96,10 @@ class Post extends Component {
 	constructor() {
 		super();
 		this.subscribe = this.subscribe.bind(this);
+		this.deletePost = this.deletePost.bind(this);
 	}
 	state = {
+		id :'',
 		uploader_id: '',
 		contents: '',
 		is_current_user_subscribed: false,
@@ -112,6 +114,7 @@ class Post extends Component {
 			<div>
 				<h6>{this.state.title}</h6>
 				<p>{this.state.contents}</p>
+				<p>{this.state.uploader_id}</p>
 				<div>
 					<p>{this.state.latitude}</p>
 					<p>{this.state.longitude}</p>
@@ -122,13 +125,15 @@ class Post extends Component {
 				</div>
 				<div>
 					<button onClick={this.subscribe}>Subscribe</button>
+					<button onClick={this.deletePost}>Delete</button>
 				</div>
 			</div>
 		);
 	}
 	componentDidMount() {
 		this.setState({
-			uploader_id: 0,
+			id : this.props.post_id,
+			uploader_id: this.props.uploader_id,
 			contents: this.props.contents,
 			title: this.props.title,
 			latitude: this.props.latitude,
@@ -139,6 +144,20 @@ class Post extends Component {
 	}
 	subscribe() {
 		console.log(this.state.title);
+	}
+	deletePost() {
+		const user_token = localStorage.usertoken;
+		let decoded = '';
+		if (user_token) {
+			decoded = jwt_decode(user_token);
+			const logged_user_id = decoded.identity.id;
+			if (logged_user_id===this.state.uploader_id){
+				axios.post(flask_server_adress+"/post/delete",{
+					deleted_post_id : this.state.id,
+					current_user_id : logged_user_id
+				})
+			}
+		}
 	}
 }
 
@@ -164,6 +183,8 @@ class PostFeed extends Component {
 			posts.push(
 				<Post
 					key={post.id}
+					post_id={post.id}
+					uploader_id={post.user_id}
 					contents={post.body}
 					title={post.title}
 					latitude={post.latitude}

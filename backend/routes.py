@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required , current_user
 from backend import backend, db, login_manager
-from backend.forms import RegisterForm,LoginForm
 from backend.models import User,Follow,Post
 from flask_jwt_extended import (create_access_token)
 
@@ -142,3 +141,13 @@ def print_posts():
     for post in posts:
         print(post.user_id, post.body)
     return 'printed posts in server console'
+
+@backend.route('/user/delete',methods=['POST'])
+def delete_user():
+    data = request.get_json()
+    if data['current_user_id'] != current_user.id :
+        abort(403)
+    user = User.query.filter_by(id=current_user.id).first()
+    db.session.delete(user)
+    db.session.commit()
+    return "deleted"

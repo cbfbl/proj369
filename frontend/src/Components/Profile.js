@@ -2,7 +2,13 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 
+const flask_server_adress = 'http://127.0.0.1:5000';
+
 class Profile extends Component {
+	constructor(){
+		super();
+		this.deleteUser=this.deleteUser.bind(this)
+	}
 	state = {
 		username: '',
 		email: '',
@@ -43,10 +49,37 @@ class Profile extends Component {
 						<p>Email: {this.state.email}</p>
 						<p>Firstname: {this.state.first_name} </p>
 						<p>Lastname: {this.state.last_name}</p>
+						<button onClick={this.deleteUser}>Delete account</button>
 					</div>
 				</div>
 			</div>
 		);
+	}
+	deleteUser(){
+		const prom_text = prompt("Write DELETE in order to delete your account")
+		if (prom_text==="DELETE"){
+			console.log("Delete")
+			const token = localStorage.usertoken;
+			let decoded = '';
+			if (token) {
+				decoded = jwt_decode(token);
+				const user_id = decoded.identity.id
+				axios.defaults.withCredentials = true;
+				axios.post(flask_server_adress+"/user/delete",{
+					current_user_id : user_id
+				}).then(response => {
+					if (response.data==="deleted"){
+						localStorage.removeItem('usertoken');
+						this.props.history.push('/')
+					}
+				}).catch(err => {
+					console.log(err);
+				})
+			}
+
+			return;
+		}
+		console.log("No delete")
 	}
 }
 

@@ -39,22 +39,6 @@ class Profile extends Component {
 				console.log(err);
 			});
 	}
-	render() {
-		return (
-			<div className="container">
-				<div className="jumbotron mt-1">
-					<p className="m-md-4" align="center" />
-					<div>
-						<p>Username: {this.state.username}</p>
-						<p>Email: {this.state.email}</p>
-						<p>Firstname: {this.state.first_name} </p>
-						<p>Lastname: {this.state.last_name}</p>
-						<button onClick={this.deleteUser}>Delete account</button>
-					</div>
-				</div>
-			</div>
-		);
-	}
 	deleteUser(){
 		const prom_text = prompt("Write DELETE in order to delete your account")
 		if (prom_text==="DELETE"){
@@ -81,6 +65,33 @@ class Profile extends Component {
 		}
 		console.log("No delete")
 	}
+	editProfile(){
+		axios.defaults.withCredentials = true;
+		axios.post(flask_server_adress+"/user/edit", {
+			username : this.state.username,
+			first_name : this.state.firstname,
+			last_name : this.state.last_name
+		}).then(this.componentDidMount()).catch(err => {
+			console.log(err);
+		})
+	}
+	render() {
+		return (
+			<div className="container">
+				<div className="jumbotron mt-1">
+					<p className="m-md-4" align="center" />
+					<div>
+						<p>Username: {this.state.username}</p>
+						<p>Email: {this.state.email}</p>
+						<p>Firstname: {this.state.first_name} </p>
+						<p>Lastname: {this.state.last_name}</p>
+						<button onClick={this.deleteUser}>Delete account</button>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
 }
 
 export default Profile;

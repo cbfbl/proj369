@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
-
-const flask_server_adress = 'http://127.0.0.1:5000';
+import {flask_server_adress} from '../utils';
+//const flask_server_adress = 'http://127.0.0.1:5000';
 
 class NewPost extends Component {
 	constructor() {
@@ -97,6 +97,7 @@ class Post extends Component {
 		super();
 		this.subscribe = this.subscribe.bind(this);
 		this.deletePost = this.deletePost.bind(this);
+		this.editPost = this.editPost.bind(this);
 	}
 	state = {
 		id :'',
@@ -109,27 +110,6 @@ class Post extends Component {
 		start_date: '',
 		end_date: ''
 	};
-	render() {
-		return (
-			<div>
-				<h6>{this.state.title}</h6>
-				<p>{this.state.contents}</p>
-				<p>{this.state.uploader_id}</p>
-				<div>
-					<p>{this.state.latitude}</p>
-					<p>{this.state.longitude}</p>
-				</div>
-				<div>
-					<p>{this.state.start_date}</p>
-					<p>{this.state.end_date}</p>
-				</div>
-				<div>
-					<button onClick={this.subscribe}>Subscribe</button>
-					<button onClick={this.deletePost}>Delete</button>
-				</div>
-			</div>
-		);
-	}
 	componentDidMount() {
 		this.setState({
 			id : this.props.post_id,
@@ -152,12 +132,60 @@ class Post extends Component {
 			decoded = jwt_decode(user_token);
 			const logged_user_id = decoded.identity.id;
 			if (logged_user_id===this.state.uploader_id){
+				axios.defaults.withCredentials = true;
 				axios.post(flask_server_adress+"/post/delete",{
 					deleted_post_id : this.state.id,
 					current_user_id : logged_user_id
 				})
 			}
 		}
+	}
+	editPost(){
+		axios.defaults.withCredentials = true;
+		axios.post(flask_server_adress+"post/edit",{
+			post_id: this.state.id,
+			body : this.state.body,
+			title: this.state.title,
+			latitude : this.state.latitude,
+			start_date : this.state.start_date,
+			end_date : this.state.end_date
+		})
+	}
+	isCurrentUserMaker(){
+		const user_token = localStorage.usertoken;
+		let decoded = '';
+		if (user_token) {
+			decoded = jwt_decode(user_token);
+			const logged_user_id = decoded.identity.id;
+			if (logged_user_id===this.state.uploader_id){
+				console.log("what");
+				return true;
+			}
+		}
+		return false;
+	}
+	render() {
+		const post_maker_buttons = <div> <button onClick={this.deletePost}>Delete</button>
+					<button onClick={this.editPost}>Edit</button> </div>;
+		const not_post_maker_buttons = <button onClick={this.subscribe}>Subscribe</button>;
+		return (
+			<div>
+				<h6>{this.state.title}</h6>
+				<p>{this.state.contents}</p>
+				<p>{this.state.uploader_id}</p>
+				<div>
+					<p>{this.state.latitude}</p>
+					<p>{this.state.longitude}</p>
+				</div>
+				<div>
+					<p>{this.state.start_date}</p>
+					<p>{this.state.end_date}</p>
+				</div>
+				<div>
+					{this.isCurrentUserMaker() ? post_maker_buttons : not_post_maker_buttons}
+				</div>
+			</div>
+		);
 	}
 }
 

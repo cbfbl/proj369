@@ -119,8 +119,8 @@ def posts(post_user_id):
     user_posts = Post.query.filter_by(user_id=post_user_id).all()
     following_users = Follow.query.filter_by(follower=post_user_id)
     ret_posts = []
-    for user in following_users:
-        current_posts = Post.query.filter_by(user_id=user.id).all()
+    for user_follower in following_users:
+        current_posts = Post.query.filter_by(user_id=user_follower.follower).all()
         ret_posts.append(current_posts.to_dict())
     for post in user_posts:
         ret_posts.append(post.to_dict())

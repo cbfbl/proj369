@@ -6,6 +6,7 @@ from datetime import datetime
 
 class Follow(db.Model):
     __tablename__ = 'follows'
+    id = db.Column(db.Integer)
     follower = db.Column(db.Integer, db.ForeignKey(
         'users.id'), primary_key=True)
     followed = db.Column(db.Integer, db.ForeignKey(

@@ -127,10 +127,12 @@ def edit_user():
     if data['current_user_id'] != current_user.id :
         abort(403)
     user = User.query.filter_by(id=current_user.id).first()
+    print(user)
     if user == None:
         return "no user"
     user.first_name = data['first_name']
     user.last_name = data['last_name']
+    print(user.first_name,user.last_name)
     db.session.commit()
     return "edited"
 

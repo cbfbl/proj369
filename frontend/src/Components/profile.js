@@ -41,6 +41,7 @@ class Profile extends Component {
 		axios
 			.get('http://127.0.0.1:5000/user/' + decoded.identity.id)
 			.then((response) => {
+				console.log(response);
 				this.setState({
 					username: response.data.username,
 					email: response.data.email,
@@ -103,21 +104,26 @@ class Profile extends Component {
 				first_name: this.state.firstname,
 				last_name: this.state.lastname
 			})
-			.then(this.componentDidMount())
+			.then((response) => {
+				if (response.data === 'edited') {
+					this.setState({
+						editable: 'false'
+					});
+					this.componentDidMount();
+				}
+			})
 			.catch((err) => {
 				console.log(err);
 			});
 	}
 	changeFirstName(ev) {
-		//ev.preventDefault();
-		console.log(ev);
+		ev.preventDefault();
 		this.setState({
 			firstname: ev.target.value
 		});
 	}
 	changeLastName(ev) {
-		//ev.preventDefault();
-		console.log(ev);
+		ev.preventDefault();
 		this.setState({
 			lastname: ev.target.value
 		});
@@ -126,6 +132,9 @@ class Profile extends Component {
 		this.setState({
 			editable: this.state.editable === 'false' ? 'true' : 'false'
 		});
+		if (this.state.editable === 'true') {
+			this.componentDidMount();
+		}
 	}
 	render() {
 		const editting = (
@@ -140,7 +149,24 @@ class Profile extends Component {
 				<button onClick={this.toggleEditable}>Edit Info</button>
 			</div>
 		);
-		console.log(this.state);
+		const ret_editable = (
+			<div>
+				<label>First name:</label>
+				<input type="text" value={this.state.firstname} onChange={this.changeFirstName} />
+				<br />
+				<label>Last name:</label>
+				<input type="text" value={this.state.lastname} onChange={this.changeLastName} />
+			</div>
+		);
+		const ret = (
+			<div>
+				<label>First name:</label>
+				{this.state.firstname}
+				<br />
+				<label>Last name:</label>
+				{this.state.lastname}
+			</div>
+		);
 		return (
 			<div style={{ color: 'black' }}>
 				<label>Username: </label>
@@ -149,16 +175,7 @@ class Profile extends Component {
 				<label>Email:</label>
 				{this.state.email}
 				<br />
-				<label>First name:</label>
-				<p style={{ display: 'inline' }} contentEditable={this.state.editable}>
-					{this.state.firstname}
-				</p>
-				<br />
-				<label>Last name:</label>
-				<p style={{ display: 'inline' }} contentEditable={this.state.editable}>
-					{this.state.lastname}
-				</p>
-
+				{this.state.editable === 'true' ? ret_editable : ret}
 				{this.state.editable === 'true' ? editting : not_editting}
 			</div>
 		);

@@ -127,12 +127,10 @@ def edit_user():
     if data['current_user_id'] != current_user.id :
         abort(403)
     user = User.query.filter_by(id=current_user.id).first()
-    print(user)
     if user == None:
         return "no user"
     user.first_name = data['first_name']
     user.last_name = data['last_name']
-    print(user.first_name,user.last_name)
     db.session.commit()
     return "edited"
 
@@ -192,16 +190,28 @@ def new_post():
     db.session.commit()
     return 'Created'
 
-
-
-
-
 @backend.route('/post/delete',methods=['POST'])
 def delete_post():
     data = request.get_json()
-    if data['current_user_id']!=current_user.id :
+    if data['current_user_id']!=current_user.id:
         abort(403)
     post = Post.query.filter_by(id=data['deleted_post_id']).first()
     db.session.delete(post)
     db.session.commit()
     return "deleted"
+
+@backend.route('/post/edit', methods=['PUT'])
+def edit_post():
+    data = request.get_json()
+    if data['current_user_id']!=current_user.id :
+        abort(403)
+    post = post.query.filter_by(id=data['post_id']).first()
+    post.body = data['body']
+    post.title = data['title']
+    post.latitude = data['latitude']
+    post.longitude = data['longitude']
+    post.start_date = data['start_date']
+    post.end_date = data['end_date']
+    db.commit()
+    return 'edited'				
+					

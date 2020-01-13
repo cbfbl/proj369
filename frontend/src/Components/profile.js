@@ -41,7 +41,6 @@ class Profile extends Component {
 		axios
 			.get('http://127.0.0.1:5000/user/' + decoded.identity.id)
 			.then((response) => {
-				console.log(response);
 				this.setState({
 					username: response.data.username,
 					email: response.data.email,

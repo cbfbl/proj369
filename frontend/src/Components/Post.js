@@ -100,6 +100,7 @@ class Post extends Component {
 		this.subscribe = this.subscribe.bind(this);
 		this.deletePost = this.deletePost.bind(this);
 		this.editPost = this.editPost.bind(this);
+		this.toggleEdit = this.toggleEdit.bind(this);
 	}
 	state = {
 		id: '',
@@ -110,7 +111,8 @@ class Post extends Component {
 		latitude: '',
 		longitude: '',
 		start_date: '',
-		end_date: ''
+		end_date: '',
+		editable: 'false'
 	};
 	componentDidMount() {
 		this.setState({
@@ -121,13 +123,9 @@ class Post extends Component {
 			latitude: this.props.latitude,
 			longitude: this.props.longitude,
 			start_date: this.props.start_date,
-			end_date: this.props.end_date
+			end_date: this.props.end_date,
+			editable: 'false'
 		});
-	}
-	componentDidUpdate(prevProps) {
-		if (prevProps.location.pathname !== this.props.location.pathname) {
-			this.componentDidMount();
-		}
 	}
 	subscribe() {
 		console.log(this.state.title);
@@ -148,15 +146,42 @@ class Post extends Component {
 		}
 	}
 	editPost() {
-		axios.defaults.withCredentials = true;
-		axios.post(flask_server_adress + 'post/edit', {
-			post_id: this.state.id,
-			body: this.state.body,
-			title: this.state.title,
-			latitude: this.state.latitude,
-			start_date: this.state.start_date,
-			end_date: this.state.end_date
+		const user_token = localStorage.usertoken;
+		let decoded = '';
+		if (user_token) {
+			decoded = jwt_decode(user_token);
+			const logged_user_id = decoded.identity.id;
+			if (logged_user_id === this.state.uploader_id) {
+				axios.defaults.withCredentials = true;
+				axios
+					.put(flask_server_adress + 'post/edit', {
+						current_user_id: logged_user_id,
+						post_id: this.state.id,
+						body: this.state.body,
+						title: this.state.title,
+						latitude: this.state.latitude,
+						longitude: this.state.longitude,
+						start_date: this.state.start_date,
+						end_date: this.state.end_date
+					})
+					.then((response) => {
+						if (response.data === 'edited') {
+							this.componentDidMount();
+						}
+					})
+					.catch((err) => {
+						console.log(err);
+					});
+			}
+		}
+	}
+	toggleEdit() {
+		this.setState({
+			editable: this.state.editable === 'false' ? 'true' : 'false'
 		});
+		if (this.state.editable === 'true') {
+			this.componentDidMount();
+		}
 	}
 	isCurrentUserMaker() {
 		const user_token = localStorage.usertoken;
@@ -165,22 +190,85 @@ class Post extends Component {
 			decoded = jwt_decode(user_token);
 			const logged_user_id = decoded.identity.id;
 			if (logged_user_id === this.state.uploader_id) {
-				console.log('what');
 				return true;
 			}
 		}
 		return false;
 	}
 	render() {
-		const post_maker_buttons = (
+		const edit_post = (
 			<div>
-				{' '}
-				<button onClick={this.deletePost}>Delete</button>
-				<button onClick={this.editPost}>Edit</button>{' '}
+				<form onSubmit={this.editPost}>
+					<input
+						type="text"
+						value={this.state.title}
+						onChange={(event) => {
+							this.setState({ title: event.target.value });
+						}}
+					/>
+					<br />
+					<input
+						type="text"
+						value={this.state.contents}
+						onChange={(event) => {
+							this.setState({ contents: event.target.value });
+						}}
+					/>
+					<p>{this.state.uploader_id}</p>
+					<div>
+						<input
+							type="number"
+							step="any"
+							value={this.state.latitude}
+							onChange={(event) => {
+								this.setState({ latitude: event.target.value });
+							}}
+						/>
+						<br />
+						<input
+							type="number"
+							step="any"
+							value={this.state.longitude}
+							onChange={(event) => {
+								this.setState({ longitude: event.target.value });
+							}}
+						/>
+					</div>
+					<div>
+						<input
+							type="date"
+							value={this.state.start_date}
+							onChange={(event) => {
+								this.setState({ start_date: event.target.value });
+							}}
+						/>
+						<br />
+						<input
+							type="date"
+							value={this.state.end_date}
+							onChange={(event) => {
+								this.setState({ end_date: event.target.value });
+							}}
+						/>
+					</div>
+				</form>
 			</div>
 		);
+		const edit_buttons = (
+			<div>
+				<button onClick={this.editPost}>Submit changes</button>
+				<button onClick={this.toggleEdit}>Cancel changes</button>
+			</div>
+		);
+		const post_maker_buttons = (
+			<div>
+				<button onClick={this.deletePost}>Delete</button>
+				<button onClick={this.toggleEdit}>Edit</button>
+			</div>
+		);
+		const maker_buttons = this.state.editable === 'true' ? edit_buttons : post_maker_buttons;
 		const not_post_maker_buttons = <button onClick={this.subscribe}>Subscribe</button>;
-		return (
+		const not_edit = (
 			<div>
 				<h6>{this.state.title}</h6>
 				<p>{this.state.contents}</p>
@@ -193,7 +281,12 @@ class Post extends Component {
 					<p>{this.state.start_date}</p>
 					<p>{this.state.end_date}</p>
 				</div>
-				<div>{this.isCurrentUserMaker() ? post_maker_buttons : not_post_maker_buttons}</div>
+			</div>
+		);
+		return (
+			<div>
+				{this.state.editable === 'false' ? not_edit : edit_post}
+				{this.isCurrentUserMaker() ? maker_buttons : not_post_maker_buttons}
 			</div>
 		);
 	}

@@ -3,8 +3,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Alert from "reactstrap/es/Alert";
 import axios from "axios";
+import "./Register.css"
 
 export const register = newUser => {
+  console.log(newUser)
   return axios
     .post("http://127.0.0.1:5000/user/new", {
       username: newUser.username,
@@ -47,7 +49,7 @@ class Register extends Component {
         password: "",
         first_name: "",
         last_name: "",
-        gender: "Please choose your gender"
+        gender: ""
       },
       user_taken: 0,
       email_taken: 0,
@@ -64,7 +66,7 @@ class Register extends Component {
     });
   };
   onChange(e) {
-    //  e.preventDefault()
+    // e.preventDefault()
     let errors = this.state.errors;
     const {name, value} = e.target;
     this.setState({[e.target.name]: e.target.value});
@@ -116,8 +118,10 @@ class Register extends Component {
       password: this.state.password
     };
 
+
     if (validateForm(this.state.errors)) {
       register(newUser).then(res => {
+        console.log(res);
         if (res === "Created") {
           this.props.history.push(`/login`);
         }
@@ -212,13 +216,6 @@ class Register extends Component {
                   onChange={this.onChange}
                 />{" "}
                 Female<br></br>
-                <input
-                  type="radio"
-                  name="gender"
-                  value="other"
-                  onChange={this.onChange}
-                />{" "}
-                Other
               </div>
               {this.state.errors.gender.length > 0 && (
                 <span className="error">{this.state.errors.gender}</span>
@@ -267,12 +264,14 @@ class Register extends Component {
                   <span className="error">{this.state.errors.password}</span>
                 )}
               </div>
+              <div className="form-group">
               <button
                 type="submit"
-                className="btn btn-lg btn-primary btn-block"
+                className="btn btn-lg btn-success btn-block"
               >
                 Register!
               </button>
+              </div>
             </form>
           </div>
         </div>

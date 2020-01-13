@@ -2,6 +2,14 @@ import React, {Component} from "react";
 import {Link, withRouter} from "react-router-dom";
 import axios from "axios";
 import jwt_decode from "jwt-decode";
+import "./Navbar.css"
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Autocomplete from "./AutoComplete";
+// import Post from "./Post";
+// import SearchTravelers from "./SearchTravelers";
+import Users from "./users";
+
 
 class Navbar extends Component {
   state = {
@@ -56,54 +64,61 @@ class Navbar extends Component {
   }
 
   render() {
+    const home = (
+      <Link to="/" className="nav-link" >
+      Home
+    </Link>
+    );
+
+    const register = (
+      <Link to="/register" className="nav-link">
+              Register
+      </Link>
+    );
+    const login = (
+      <Link to="/login" className="nav-link">
+             Login
+      </Link>
+    );
+    const userLink= (
+    <> 
+      <Col>
+        <Link to="/" className="nav-link" onClick={this.logOut.bind(this)}>
+          Logout
+        </Link>
+      </Col>
+      <Col>
+        <Link to="/profile" className="nav-link" >
+          Profile
+        </Link>
+      </Col>
+      <Col>
+      <Link to="/SearchTravelers" className="nav-link">
+      Post-Search</Link>
+      </Col>
+      <Col>
+      <Link to="/Post" className="nav-link">
+      Post-Feed</Link>
+      </Col>
+      <Col><Autocomplete/></Col>
+    </>
+    );
     const loginRegLink = (
-      <ul className="navbar-nav">
-        <li className="nav-item">
-          <Link to="/login" className="nav-link">
-            Login
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/register" className="nav-link">
-            Register
-          </Link>
-        </li>
-      </ul>
-    );
-
-    const userLink = (
-      <ul className="navbar-nav">
-        <li className="nav-item">
-          <a href="" onClick={this.logOut.bind(this)} className="nav-link">
-            Logout
-          </a>
-        </li>
-        <li className="nav-item">
-          <a href="/profile" className="nav-link">
-            Profile
-          </a>
-        </li>
-      </ul>
-    );
-
+      <>
+      <Col>{login}</Col>
+      <Col>{register}</Col>
+      </>
+		);
     return (
-      <div>
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark rounded">
-          <div
-            className="collapse navbar-collapse justify-content-md-center col-md-12 "
-            id="navbarsExample10"
-          >
-            <ul className="navbar-nav">
-              <li className="nav-item">
-                <Link to="/" className="nav-link">
-                  Home
-                </Link>
-              </li>
-            </ul>
-            {localStorage.usertoken ? userLink : loginRegLink}
-          </div>
-        </nav>
-      </div>
+      <>
+        <Row>
+          <Col>{home}</Col>
+          {localStorage.usertoken ? userLink : loginRegLink}
+        </Row>
+        <div>
+          <Users/>
+        </div>
+      </>
     );
   }
 }

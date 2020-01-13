@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
-import {flask_server_adress} from '../utils';
+import { flask_server_adress } from '../utils';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 //const flask_server_adress = 'http://127.0.0.1:5000';
@@ -102,7 +102,7 @@ class Post extends Component {
 		this.editPost = this.editPost.bind(this);
 	}
 	state = {
-		id :'',
+		id: '',
 		uploader_id: '',
 		contents: '',
 		is_current_user_subscribed: false,
@@ -114,7 +114,7 @@ class Post extends Component {
 	};
 	componentDidMount() {
 		this.setState({
-			id : this.props.post_id,
+			id: this.props.post_id,
 			uploader_id: this.props.uploader_id,
 			contents: this.props.contents,
 			title: this.props.title,
@@ -123,6 +123,11 @@ class Post extends Component {
 			start_date: this.props.start_date,
 			end_date: this.props.end_date
 		});
+	}
+	componentDidUpdate(prevProps) {
+		if (prevProps.location.pathname !== this.props.location.pathname) {
+			this.componentDidMount();
+		}
 	}
 	subscribe() {
 		console.log(this.state.title);
@@ -133,42 +138,47 @@ class Post extends Component {
 		if (user_token) {
 			decoded = jwt_decode(user_token);
 			const logged_user_id = decoded.identity.id;
-			if (logged_user_id===this.state.uploader_id){
+			if (logged_user_id === this.state.uploader_id) {
 				axios.defaults.withCredentials = true;
-				axios.post(flask_server_adress+"/post/delete",{
-					deleted_post_id : this.state.id,
-					current_user_id : logged_user_id
-				})
+				axios.post(flask_server_adress + '/post/delete', {
+					deleted_post_id: this.state.id,
+					current_user_id: logged_user_id
+				});
 			}
 		}
 	}
-	editPost(){
+	editPost() {
 		axios.defaults.withCredentials = true;
-		axios.post(flask_server_adress+"post/edit",{
+		axios.post(flask_server_adress + 'post/edit', {
 			post_id: this.state.id,
-			body : this.state.body,
+			body: this.state.body,
 			title: this.state.title,
-			latitude : this.state.latitude,
-			start_date : this.state.start_date,
-			end_date : this.state.end_date
-		})
+			latitude: this.state.latitude,
+			start_date: this.state.start_date,
+			end_date: this.state.end_date
+		});
 	}
-	isCurrentUserMaker(){
+	isCurrentUserMaker() {
 		const user_token = localStorage.usertoken;
 		let decoded = '';
 		if (user_token) {
 			decoded = jwt_decode(user_token);
 			const logged_user_id = decoded.identity.id;
-			if (logged_user_id===this.state.uploader_id){
-				console.log("what");
+			if (logged_user_id === this.state.uploader_id) {
+				console.log('what');
 				return true;
 			}
 		}
 		return false;
 	}
 	render() {
-		const post_maker_buttons = <div> <button onClick={this.deletePost}>Delete</button>
-					<button onClick={this.editPost}>Edit</button> </div>;
+		const post_maker_buttons = (
+			<div>
+				{' '}
+				<button onClick={this.deletePost}>Delete</button>
+				<button onClick={this.editPost}>Edit</button>{' '}
+			</div>
+		);
 		const not_post_maker_buttons = <button onClick={this.subscribe}>Subscribe</button>;
 		return (
 			<div>
@@ -183,9 +193,7 @@ class Post extends Component {
 					<p>{this.state.start_date}</p>
 					<p>{this.state.end_date}</p>
 				</div>
-				<div>
-					{this.isCurrentUserMaker() ? post_maker_buttons : not_post_maker_buttons}
-				</div>
+				<div>{this.isCurrentUserMaker() ? post_maker_buttons : not_post_maker_buttons}</div>
 			</div>
 		);
 	}
@@ -245,15 +253,12 @@ class Postpage extends Component {
 					<Col>
 						<NewPost onSubmit={this.onSubmit} />
 					</Col>
-					<Col>	
+					<Col>
 						<PostFeed />
-					</Col>	
+					</Col>
 				</Row>
 			</div>
 		);
 	}
 }
-export {
-	Postpage,
-	NewPost
-}
+export { Postpage, NewPost };

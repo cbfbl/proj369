@@ -106,6 +106,12 @@ def register():
     db.session.commit()
     return 'Created'
 
+@backend.route("/user/<string:name>", methods=['GET'])
+def get_user_id(name):
+    user = User.query.filter_by(username=name).first()
+    if not user:
+        abort(404)
+    return jsonify({'id': user.id})
 
 @backend.route('/user/<int:user_id>',methods=['GET'])
 def get_user(user_id):
@@ -115,6 +121,28 @@ def get_user(user_id):
     p = user.to_dict()
     return jsonify(user.to_dict())
 
+@backend.route('/user/edit', methods=['PUT'])
+def edit_user():
+    data = request.get_json()
+    if data['current_user_id'] != current_user.id :
+        abort(403)
+    user = User.query.filter_by(id=current_user.id).first()
+    if user == None:
+        return "no user"
+    user.first_name = data['first_name']
+    user.last_name = data['last_name']
+    db.session.commit()
+    return "edited"
+
+@backend.route('/user/delete',methods=['POST'])
+def delete_user():
+    data = request.get_json()
+    if data['current_user_id'] != current_user.id :
+        abort(403)
+    user = User.query.filter_by(id=current_user.id).first()
+    db.session.delete(user)
+    db.session.commit()
+    return "deleted"
 
 @backend.route('/follow/<int:user_id>', methods=['POST'])
 @login_required
@@ -132,13 +160,6 @@ def unfollow(user_id):
     db.session.commit()
     return jsonify({'sometext' : "Hello"})
 
-
-@backend.route("/user/<string:name>", methods=['GET'])
-def get_user_id(name):
-    user = User.query.filter_by(username=name).first()
-    if not user:
-        abort(404)
-    return jsonify({'id': user.id})
 
 
 @backend.route('/post/<int:post_user_id>',methods=['GET'])
@@ -170,15 +191,7 @@ def new_post():
     return 'Created'
 
 
-@backend.route('/user/delete',methods=['POST'])
-def delete_user():
-    data = request.get_json()
-    if data['current_user_id'] != current_user.id :
-        abort(403)
-    user = User.query.filter_by(id=current_user.id).first()
-    db.session.delete(user)
-    db.session.commit()
-    return "deleted"
+
 
 
 @backend.route('/post/delete',methods=['POST'])

@@ -3,11 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required , current_user
 from backend import backend, db, login_manager
-from backend.forms import RegisterForm,LoginForm
 from backend.models import User, Post, Follow
 from flask_jwt_extended import (create_access_token)
 import datetime
-import jsonpickle
+#import jsonpickle
 
 db.create_all()
 
@@ -67,7 +66,7 @@ def get_list_users():
     list_users = []
     for user in users:
         list_users.append(user.username)
-    return jsonpickle.encode(list_users)
+    return jsonify(list_users)
 
 
 @backend.route('/locations',methods=['GET'])

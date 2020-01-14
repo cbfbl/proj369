@@ -160,7 +160,6 @@ class Post extends Component {
 			decoded = jwt_decode(user_token);
 			const logged_user_id = decoded.identity.id;
 			if (logged_user_id===this.state.uploader_id){
-				console.log("what");
 				return true;
 			}
 		}

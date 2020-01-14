@@ -6,7 +6,6 @@ import axios from "axios";
 import "./Register.css"
 
 export const register = newUser => {
-  console.log(newUser)
   return axios
     .post("http://127.0.0.1:5000/user/new", {
       username: newUser.username,

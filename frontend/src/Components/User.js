@@ -85,7 +85,7 @@ class User extends Component {
 		return (
 			<div>
 				user info : <ul>{user_info}</ul>
-				<Button variant="Primary" onClick={() => this.followUser()}>
+				<Button variant="primary" onClick={() => this.followUser()}>
 					Follow this user
 				</Button>
 				<Button variant="primary" onClick={() => this.unfollowUser()}>

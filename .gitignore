@@ -3,3 +3,4 @@
 /.vscode
 /backend/__pycache__
 *.cpython*
+npm-debug.log

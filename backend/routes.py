@@ -75,7 +75,9 @@ def travel_locations():
     locations_list = []
     posts = Post.query.all()
     for post in posts:
-        locations_list.append([post.latitude, post.longitude])
+        start_date = post.start_date.strftime("%Y-%m-%d")
+        end_date = post.end_date.strftime("%Y-%m-%d")
+        locations_list.append([post.latitude, post.longitude,start_date,end_date])
     return jsonpickle.encode(locations_list)
 
 

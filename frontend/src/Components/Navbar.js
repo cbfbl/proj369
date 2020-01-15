@@ -111,13 +111,13 @@ class Navbar extends Component {
 		);
     return (
       <>
-        <Row>
+        <Row id="navbar-row">
           <Col>{home}</Col>
           {localStorage.usertoken ? userLink : loginRegLink}
         </Row>
-        <div>
+        {/* <div>
           <Users/>
-        </div>
+        </div> */}
       </>
     );
   }

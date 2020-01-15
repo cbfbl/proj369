@@ -21,57 +21,60 @@ class NewPost extends Component {
 	}
 	render() {
 		return (
-			<form onSubmit={this.onSubmit}>
+			<form class="form-horizontal" onSubmit={this.onSubmit}>
 				<div>
-					<label>Title : </label>
+					<label class="col-sm-2">Title : </label>
 					<input
 						type="text"
 						onChange={(event) => {
 							this.setState({ title: event.target.value });
 						}}
 					/>
-					<label>Message : </label>
+					<div>
+					<label class="col-sm-2">Message : </label>
 					<input
 						type="textarea"
 						onChange={(event) => {
 							this.setState({ body: event.target.value });
 						}}
-					/>
+					/></div>
 				</div>
 				<div>
-					<label>start date : </label>
+					<label class="col-sm-2">start date : </label>
 					<input
 						type="date"
 						onChange={(event) => {
 							this.setState({ start_date: event.target.value });
 						}}
 					/>
-					<label>end date : </label>
+					<div>
+					<label class="col-sm-2">end date : </label>
 					<input
 						type="date"
 						onChange={(event) => {
 							this.setState({ end_date: event.target.value });
 						}}
-					/>
+					/></div>
 				</div>
 				<div>
-					<label>latitude : </label>
+					<label class="col-sm-2">latitude : </label>
 					<input
 						type="number"
 						onChange={(event) => {
 							this.setState({ latitude: event.target.value });
 						}}
 					/>
-					<label>longitude : </label>
+					<div>
+					<label class="col-sm-2">longitude : </label>
 					<input
 						type="number"
 						onChange={(event) => {
 							this.setState({ longitude: event.target.value });
 						}}
-					/>
+					/></div>
 				</div>
-				<div>
-					<input type="submit" value="Submit" />
+				<div class="col-sm-2">
+					<input type="submit" class="btn-success" value="Submit" />
 				</div>
 			</form>
 		);
@@ -242,6 +245,7 @@ class Postpage extends Component {
 			<div className="postfeed">
 				<Row>
 					<Col>
+					<h3>Create New Post</h3>
 						<NewPost onSubmit={this.onSubmit} />
 					</Col>
 					<Col>	

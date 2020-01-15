@@ -213,7 +213,7 @@ class Register extends Component {
                   name="gender"
                   value="Female"
                   onChange={this.onChange}
-                />{" "}
+                /> {" "}
                 Female<br></br>
               </div>
               {this.state.errors.gender.length > 0 && (

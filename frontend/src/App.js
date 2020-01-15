@@ -26,12 +26,12 @@ class App extends Component {
     return (
       <Router>
         <div className="App">
-          <div className="banner">
-            <h1>Welcome To Travelers</h1>
-          </div>
           <div className="search">
             <Navbar />
           </div> 
+          <div className="banner">
+            <h1>Welcome To Travelers</h1>
+          </div>
           
             <Route exact path="/" />
               <div className="container">
@@ -61,7 +61,6 @@ class App extends Component {
                 <Route exact path="/Post" render={(props) => <Postpage {...props} />}/>
               </div>
             </div>
-          {/* <footer>hellooooooooooooooooooooooooooooo</footer> */}
       </Router>
     );
   }

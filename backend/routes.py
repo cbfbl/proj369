@@ -3,11 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required , current_user
 from backend import backend, db, login_manager
-from backend.forms import RegisterForm,LoginForm
 from backend.models import User, Post, Follow
 from flask_jwt_extended import (create_access_token)
 import datetime
-import jsonpickle
+#import jsonpickle
 
 db.create_all()
 
@@ -67,7 +66,7 @@ def get_list_users():
     list_users = []
     for user in users:
         list_users.append(user.username)
-    return jsonpickle.encode(list_users)
+    return jsonify(list_users)
 
 
 @backend.route('/locations',methods=['GET'])
@@ -106,6 +105,12 @@ def register():
     db.session.commit()
     return 'Created'
 
+@backend.route("/user/<string:name>", methods=['GET'])
+def get_user_id(name):
+    user = User.query.filter_by(username=name).first()
+    if not user:
+        abort(404)
+    return jsonify({'id': user.id})
 
 @backend.route('/user/<int:user_id>',methods=['GET'])
 def get_user(user_id):
@@ -115,6 +120,28 @@ def get_user(user_id):
     p = user.to_dict()
     return jsonify(user.to_dict())
 
+@backend.route('/user/edit', methods=['PUT'])
+def edit_user():
+    data = request.get_json()
+    if data['current_user_id'] != current_user.id :
+        abort(403)
+    user = User.query.filter_by(id=current_user.id).first()
+    if user == None:
+        return "no user"
+    user.first_name = data['first_name']
+    user.last_name = data['last_name']
+    db.session.commit()
+    return "edited"
+
+@backend.route('/user/delete',methods=['POST'])
+def delete_user():
+    data = request.get_json()
+    if data['current_user_id'] != current_user.id :
+        abort(403)
+    user = User.query.filter_by(id=current_user.id).first()
+    db.session.delete(user)
+    db.session.commit()
+    return "deleted"
 
 @backend.route('/follow/<int:user_id>', methods=['POST'])
 @login_required
@@ -132,13 +159,6 @@ def unfollow(user_id):
     db.session.commit()
     return jsonify({'sometext' : "Hello"})
 
-
-@backend.route("/user/<string:name>", methods=['GET'])
-def get_user_id(name):
-    user = User.query.filter_by(username=name).first()
-    if not user:
-        abort(404)
-    return jsonify({'id': user.id})
 
 
 @backend.route('/post/<int:post_user_id>',methods=['GET'])
@@ -169,24 +189,28 @@ def new_post():
     db.session.commit()
     return 'Created'
 
-
-@backend.route('/user/delete',methods=['POST'])
-def delete_user():
-    data = request.get_json()
-    if data['current_user_id'] != current_user.id :
-        abort(403)
-    user = User.query.filter_by(id=current_user.id).first()
-    db.session.delete(user)
-    db.session.commit()
-    return "deleted"
-
-
 @backend.route('/post/delete',methods=['POST'])
 def delete_post():
     data = request.get_json()
-    if data['current_user_id']!=current_user.id :
+    if data['current_user_id']!=current_user.id:
         abort(403)
     post = Post.query.filter_by(id=data['deleted_post_id']).first()
     db.session.delete(post)
     db.session.commit()
     return "deleted"
+
+@backend.route('/post/edit', methods=['PUT'])
+def edit_post():
+    data = request.get_json()
+    if data['current_user_id']!=current_user.id :
+        abort(403)
+    post = post.query.filter_by(id=data['post_id']).first()
+    post.body = data['body']
+    post.title = data['title']
+    post.latitude = data['latitude']
+    post.longitude = data['longitude']
+    post.start_date = data['start_date']
+    post.end_date = data['end_date']
+    db.commit()
+    return 'edited'				
+					

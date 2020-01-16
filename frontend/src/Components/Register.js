@@ -28,7 +28,7 @@ export const register = (newUser) => {
 
 export const registerAndPost = (newRegiPost) => {
 	return axios
-		.post(flask_server_adress + '/regipost', {
+		.post(flask_server_adress + '/user/regipost', {
 			username: newRegiPost.username,
 			first_name: newRegiPost.first_name,
 			last_name: newRegiPost.last_name,

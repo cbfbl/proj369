@@ -87,7 +87,6 @@ def logout():
 
 @backend.route('/user/new',methods=['POST'])
 def register():
-    print('hello')
     data = request.get_json()
     if not data or not 'password' in data or not 'username' in data or not 'first_name' in data \
             or not 'last_name' in data or not 'gender' in data or not 'birth_date' in data or not 'email' in data:
@@ -102,6 +101,38 @@ def register():
                     last_name=data['last_name'], birth_date=data['birth_date'])
     new_user.password = data['password']
     db.session.add(new_user)
+    db.session.commit()
+    return 'Created'
+
+@backend.route('/user/regipost', methods=['POST'])
+def regipost():
+    data = request.get_json()
+    problem = False
+    if not data or not 'password' in data or not 'username' in data or not 'first_name' in data \
+            or not 'last_name' in data or not 'gender' in data or not 'birth_date' in data or not 'email' in data:
+        abort(400)
+    check_user = User.query.filter_by(email=data['email']).first()
+    if check_user:
+        return 'Email Taken'
+    check_user = User.query.filter_by(username=data['username']).first()
+    if check_user:
+        return 'Username Taken'
+    new_user = User(username=data['username'], email=data['email'], gender=data['gender'], first_name=data['first_name'],
+                    last_name=data['last_name'], birth_date=data['birth_date'])
+    new_user.password = data['password']
+    db.session.add(new_user)
+
+    start_date_list = data['post_start_date'].split('-')
+    end_date_list = data['post_end_date'].split('-')
+    p_start_date = datetime.datetime(int(start_date_list[0]),int(start_date_list[1]),int(start_date_list[2]))
+    p_end_date = datetime.datetime(int(end_date_list[0]),int(end_date_list[1]),int(end_date_list[2]))
+    new_post = Post(user_id=new_user.id, title=data['post_title'], body=data['post_body'], \
+                    start_date=p_start_date, end_date=p_end_date, \
+                    latitude=data['post_latitude'], longitude=data['post_longitude'])
+    db.session.add(new_post)
+    if problem:
+        db.session.rollback()
+        abort(400)
     db.session.commit()
     return 'Created'
 
@@ -132,6 +163,9 @@ def edit_user():
     user.last_name = data['last_name']
     db.session.commit()
     return "edited"
+
+
+    
 
 @backend.route('/user/delete',methods=['POST'])
 def delete_user():

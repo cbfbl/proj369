@@ -192,3 +192,23 @@ def delete_post():
     db.session.delete(post)
     db.session.commit()
     return "deleted"
+
+
+@backend.errorhandler(500)
+def internal_error(e):
+    return "500 Error"
+
+
+@backend.errorhandler(403)
+def internal_error(e):
+    return "403 Error"
+
+
+@backend.errorhandler(404)
+def internal_error(e):
+    return "404 Error"
+
+
+@backend.errorhandler(400)
+def internal_error(e):
+    return "400 Error"

@@ -66,8 +66,6 @@ class Autocomplete extends Component {
 
   // Event fired when the user clicks on a suggestion
   onClick = e => {
-    console.log("Inside Click");
-    console.log(this.props);
     this.props.history.push(`/user/` + e.currentTarget.innerText);
     // Update the user input and reset the rest of the state
     this.setState({

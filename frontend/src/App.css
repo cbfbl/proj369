@@ -28,6 +28,9 @@
 .User-properties, .postfeed{
   color: #ddd;
 }
+.map-container{
+  color: #ddd;
+}
 /* h1{
   text-align: center;
   margin: 0 0 0.5em 0;

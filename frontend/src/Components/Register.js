@@ -36,12 +36,12 @@ export const registerAndPost = (newRegiPost) => {
 			birth_date: newRegiPost.birth_date,
 			email: newRegiPost.email,
 			password: newRegiPost.password,
-			title: newRegiPost.title,
-			body: newRegiPost.body,
-			start_date: newRegiPost.start_date,
-			end_date: newRegiPost.end_date,
-			latitude: newRegiPost.latitude,
-			longitude: newRegiPost.longitude
+			post_title: newRegiPost.post_title,
+			post_body: newRegiPost.post_body,
+			post_start_date: newRegiPost.start_date,
+			post_end_date: newRegiPost.end_date,
+			post_latitude: newRegiPost.latitude,
+			post_longitude: newRegiPost.longitude
 		})
 		.then((response) => {
 			return response.data;
@@ -153,10 +153,10 @@ class Register extends Component {
 		if (this.state.post_and_register) {
 			newUser.post_title = this.state.post_title;
 			newUser.post_body = this.state.post_body;
-			newUser.start_date = this.state.start_date;
-			newUser.end_date = this.state.end_date;
-			newUser.latitude = this.state.latitude;
-			newUser.longitude = this.state.longitude;
+			newUser.start_date = this.state.post_start_date;
+			newUser.end_date = this.state.post_end_date;
+			newUser.latitude = this.state.post_latitude;
+			newUser.longitude = this.state.post_longitude;
 		}
 		if (validateForm(this.state.errors) && !this.state.post_and_register) {
 			register(newUser)

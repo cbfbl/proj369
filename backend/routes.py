@@ -107,6 +107,7 @@ def register():
 @backend.route('/user/regipost', methods=['POST'])
 def regipost():
     data = request.get_json()
+    print(data)
     problem = False
     if not data or not 'password' in data or not 'username' in data or not 'first_name' in data \
             or not 'last_name' in data or not 'gender' in data or not 'birth_date' in data or not 'email' in data:
@@ -119,9 +120,15 @@ def regipost():
         return 'Username Taken'
     new_user = User(username=data['username'], email=data['email'], gender=data['gender'], first_name=data['first_name'],
                     last_name=data['last_name'], birth_date=data['birth_date'])
+
     new_user.password = data['password']
     db.session.add(new_user)
-
+    db.session.commit()
+    print(new_user.id)
+    if new_user.id == None:
+        db.session.rollback()
+        problem = True
+        abort(400)
     start_date_list = data['post_start_date'].split('-')
     end_date_list = data['post_end_date'].split('-')
     p_start_date = datetime.datetime(int(start_date_list[0]),int(start_date_list[1]),int(start_date_list[2]))
@@ -252,3 +259,10 @@ def edit_post():
     db.session.commit()
     return 'edited'				
 					
+
+@backend.route('/printposts', methods=['GET'])
+def print_posts():
+    posts = Post.query.all()
+    for post in posts:
+        print(post.to_dict())
+    return 'Printed posts to server console'

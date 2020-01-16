@@ -4,7 +4,7 @@ import jwt_decode from 'jwt-decode';
 import { flask_server_adress } from '../utils';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { Redirect, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 //const flask_server_adress = 'http://127.0.0.1:5000';
 
 class NewPost extends Component {
@@ -59,6 +59,7 @@ class NewPost extends Component {
 					<label>latitude : </label>
 					<input
 						type="number"
+						step="any"
 						onChange={(event) => {
 							this.setState({ latitude: event.target.value });
 						}}
@@ -66,6 +67,7 @@ class NewPost extends Component {
 					<label>longitude : </label>
 					<input
 						type="number"
+						step="any"
 						onChange={(event) => {
 							this.setState({ longitude: event.target.value });
 						}}

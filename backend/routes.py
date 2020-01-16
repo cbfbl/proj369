@@ -6,7 +6,7 @@ from backend import backend, db, login_manager
 from backend.models import User, Post, Follow
 from flask_jwt_extended import (create_access_token)
 import datetime
-#import jsonpickle
+import jsonpickle
 
 db.create_all()
 
@@ -161,7 +161,7 @@ def unfollow(user_id):
 
 
 
-@backend.route('/post/<int:post_user_id>',methods=['GET'])
+@backend.route('/post/posts/<int:post_user_id>',methods=['GET'])
 def posts(post_user_id):
     #if user_id in db
     user_posts = Post.query.filter_by(user_id=post_user_id).all()
@@ -174,6 +174,10 @@ def posts(post_user_id):
         ret_posts.append(post.to_dict())
     return jsonify(ret_posts)
 
+@backend.route('/post/<int:post_id>', methods=['GET'])
+def get_post(post_id):
+    post = Post.query.filter_by(id=post_id).first()
+    return jsonify(post.to_dict())
 
 @backend.route('/post/new', methods=['POST'])
 def new_post():
@@ -204,13 +208,13 @@ def edit_post():
     data = request.get_json()
     if data['current_user_id']!=current_user.id :
         abort(403)
-    post = post.query.filter_by(id=data['post_id']).first()
+    post = Post.query.filter_by(id=data['post_id']).first()
     post.body = data['body']
     post.title = data['title']
     post.latitude = data['latitude']
     post.longitude = data['longitude']
     post.start_date = data['start_date']
     post.end_date = data['end_date']
-    db.commit()
+    db.session.commit()
     return 'edited'				
 					

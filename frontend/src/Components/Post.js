@@ -4,6 +4,7 @@ import jwt_decode from 'jwt-decode';
 import { flask_server_adress } from '../utils';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { Redirect, withRouter } from 'react-router-dom';
 //const flask_server_adress = 'http://127.0.0.1:5000';
 
 class NewPost extends Component {
@@ -88,6 +89,9 @@ class NewPost extends Component {
 				latitude: this.state.latitude,
 				longitude: this.state.longitude
 			})
+			.then((response) => {
+				this.props.history.push('/Post');
+			})
 			.catch((err) => {
 				console.log(err);
 			});
@@ -112,21 +116,46 @@ class Post extends Component {
 		longitude: '',
 		start_date: '',
 		end_date: '',
-		editable: 'false'
+		editable: 'false',
+		changed: false
 	};
 	componentDidMount() {
-		this.setState({
-			id: this.props.post_id,
-			uploader_id: this.props.uploader_id,
-			contents: this.props.contents,
-			title: this.props.title,
-			latitude: this.props.latitude,
-			longitude: this.props.longitude,
-			start_date: this.props.start_date,
-			end_date: this.props.end_date,
-			editable: 'false'
-		});
+		if (!this.state.changed) {
+			this.setState({
+				id: this.props.post_id,
+				uploader_id: this.props.uploader_id,
+				contents: this.props.contents,
+				title: this.props.title,
+				latitude: this.props.latitude,
+				longitude: this.props.longitude,
+				start_date: this.props.start_date,
+				end_date: this.props.end_date,
+				editable: 'false'
+			});
+		} else {
+			axios.defaults.withCredentials = true;
+			axios
+				.get(flask_server_adress + '/post/' + this.state.id)
+				.then((response) => {
+					const post_data = response.data;
+
+					this.setState({
+						contents: post_data.body,
+						title: post_data.title,
+						latitude: post_data.latitude,
+						longitude: post_data.longitude,
+						start_date: post_data.start_date,
+						end_date: post_data.end_date,
+						editable: 'false',
+						changed: false
+					});
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		}
 	}
+
 	subscribe() {
 		console.log(this.state.title);
 	}
@@ -138,10 +167,19 @@ class Post extends Component {
 			const logged_user_id = decoded.identity.id;
 			if (logged_user_id === this.state.uploader_id) {
 				axios.defaults.withCredentials = true;
-				axios.post(flask_server_adress + '/post/delete', {
-					deleted_post_id: this.state.id,
-					current_user_id: logged_user_id
-				});
+				axios
+					.post(flask_server_adress + '/post/delete', {
+						deleted_post_id: this.state.id,
+						current_user_id: logged_user_id
+					})
+					.then((response) => {
+						if (response.data === 'deleted') {
+							this.props.history.push('/Post');
+						}
+					})
+					.catch((err) => {
+						console.log(err);
+					});
 			}
 		}
 	}
@@ -154,10 +192,10 @@ class Post extends Component {
 			if (logged_user_id === this.state.uploader_id) {
 				axios.defaults.withCredentials = true;
 				axios
-					.put(flask_server_adress + 'post/edit', {
+					.put(flask_server_adress + '/post/edit', {
 						current_user_id: logged_user_id,
 						post_id: this.state.id,
-						body: this.state.body,
+						body: this.state.contents,
 						title: this.state.title,
 						latitude: this.state.latitude,
 						longitude: this.state.longitude,
@@ -166,6 +204,9 @@ class Post extends Component {
 					})
 					.then((response) => {
 						if (response.data === 'edited') {
+							this.setState({
+								changed: true
+							});
 							this.componentDidMount();
 						}
 					})
@@ -189,7 +230,7 @@ class Post extends Component {
 		if (user_token) {
 			decoded = jwt_decode(user_token);
 			const logged_user_id = decoded.identity.id;
-			if (logged_user_id===this.state.uploader_id){
+			if (logged_user_id === this.state.uploader_id) {
 				return true;
 			}
 		}
@@ -303,16 +344,22 @@ class PostFeed extends Component {
 			decoded = jwt_decode(user_token);
 			const user_posts_id = decoded.identity.id;
 			axios.defaults.withCredentials = true;
-			axios.get(flask_server_adress + '/post/' + user_posts_id).then((response) => {
-				this.setState({ posts: response.data });
-			});
+			axios
+				.get(flask_server_adress + '/post/posts/' + user_posts_id)
+				.then((response) => {
+					this.setState({ posts: response.data });
+				})
+				.catch((err) => {
+					console.log(err);
+				});
 		}
 	}
 	render() {
 		let posts = [];
+		let PostRouter = withRouter(Post);
 		for (const post of this.state.posts) {
 			posts.push(
-				<Post
+				<PostRouter
 					key={post.id}
 					post_id={post.id}
 					uploader_id={post.user_id}
@@ -336,22 +383,24 @@ class Postpage extends Component {
 	}
 	onSubmit(e) {
 		e.preventDefault();
-		axios.post(flask_server_adress + '/post/new', {});
+		this.props.history.push('/Post');
 	}
-
 	render() {
+		const PostFeedRouter = withRouter(PostFeed);
+		const NewPostRouter = withRouter(NewPost);
 		return (
 			<div className="postfeed">
 				<Row>
 					<Col>
-						<NewPost onSubmit={this.onSubmit} />
+						<NewPostRouter />
 					</Col>
 					<Col>
-						<PostFeed />
+						<PostFeedRouter />
 					</Col>
 				</Row>
 			</div>
 		);
 	}
 }
+
 export { Postpage, NewPost };

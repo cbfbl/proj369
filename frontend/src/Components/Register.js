@@ -61,72 +61,7 @@ const validateForm = (errors) => {
 	return valid;
 };
 
-let newUser = {
-	username: this.state.username,
-	first_name: this.state.first_name,
-	last_name: this.state.last_name,
-	gender: this.state.gender,
-	birth_date: this.state.birth_date,
-	email: this.state.email,
-	password: this.state.password
-};
-if (this.state.post_and_register) {
-	newUser.post_title = this.state.post_title;
-	newUser.post_body = this.state.post_body;
-	newUser.start_date = this.state.post_start_date;
-	newUser.end_date = this.state.post_end_date;
-	newUser.latitude = this.state.post_latitude;
-	newUser.longitude = this.state.post_longitude;
-}
-if (validateForm(this.state.errors) && !this.state.post_and_register) {
-	register(newUser)
-		.then((res) => {
-			console.log(res);
-			if (res === 'Created') {
-				this.props.history.push(`/login`);
-			}
-			if (res === 'Username Taken') {
-				this.setState({ user_taken: 1 });
-				this.setState({ invalid: 1 });
-			}
-			if (res === 'Email Taken') {
-				this.setState({ email_taken: 1 });
-				this.setState({ invalid: 1 });
-			}
-		})
-		.catch((err) => {
-			console.log(err);
-		});
-} else if (validateForm(this.state.errors) && this.state.post_and_register) {
-	registerAndPost(newUser)
-		.then((res) => {
-			console.log(res);
-			if (res === 'Created') {
-				this.props.history.push(`/login`);
-			}
-			if (res === 'Username Taken') {
-				this.setState({ user_taken: 1 });
-				this.setState({ invalid: 1 });
-			}
-			if (res === 'Email Taken') {
-				this.setState({ email_taken: 1 });
-				this.setState({ invalid: 1 });
-			}
-		})
-		.catch((err) => {
-			console.log(err);
-		});
-} else {
-	this.setState({ invalid: 1 });
-}
-}
-changeRegibox(ev) {
-const res = ev.target.checked;
-this.setState({
-	post_and_register: res
-});
-console.log(ev.target.checked);
-}
+
 
 class Register extends Component {
 	constructor() {
@@ -207,7 +142,74 @@ class Register extends Component {
 		this.setState({ invalid: 0 });
 		this.setState({ user_taken: 0 });
 		this.setState({ email_taken: 0 });
+
+		let newUser = {
+			username: this.state.username,
+			first_name: this.state.first_name,
+			last_name: this.state.last_name,
+			gender: this.state.gender,
+			birth_date: this.state.birth_date,
+			email: this.state.email,
+			password: this.state.password
+		};
+		if (this.state.post_and_register) {
+			newUser.post_title = this.state.post_title;
+			newUser.post_body = this.state.post_body;
+			newUser.start_date = this.state.post_start_date;
+			newUser.end_date = this.state.post_end_date;
+			newUser.latitude = this.state.post_latitude;
+			newUser.longitude = this.state.post_longitude;
 		}
+		if (validateForm(this.state.errors) && !this.state.post_and_register) {
+			register(newUser)
+				.then((res) => {
+					console.log(res);
+					if (res === 'Created') {
+						this.props.history.push(`/login`);
+					}
+					if (res === 'Username Taken') {
+						this.setState({ user_taken: 1 });
+						this.setState({ invalid: 1 });
+					}
+					if (res === 'Email Taken') {
+						this.setState({ email_taken: 1 });
+						this.setState({ invalid: 1 });
+					}
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		} else if (validateForm(this.state.errors) && this.state.post_and_register) {
+			registerAndPost(newUser)
+				.then((res) => {
+					console.log(res);
+					if (res === 'Created') {
+						this.props.history.push(`/login`);
+					}
+					if (res === 'Username Taken') {
+						this.setState({ user_taken: 1 });
+						this.setState({ invalid: 1 });
+					}
+					if (res === 'Email Taken') {
+						this.setState({ email_taken: 1 });
+						this.setState({ invalid: 1 });
+					}
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		} else {
+			this.setState({ invalid: 1 });
+		}
+		
+	}
+			changeRegibox(ev) {
+			const res = ev.target.checked;
+			this.setState({
+				post_and_register: res
+			});
+			console.log(ev.target.checked);
+			}
 
   render() {
     return (

@@ -21,9 +21,9 @@ class NewPost extends Component {
 	}
 	render() {
 		return (
-			<form class="form-horizontal" onSubmit={this.onSubmit}>
+			<form className="form-horizontal" onSubmit={this.onSubmit}>
 				<div>
-					<label class="col-sm-2">Title : </label>
+					<label className="col-sm-2">Title : </label>
 					<input
 						type="text"
 						onChange={(event) => {
@@ -31,7 +31,7 @@ class NewPost extends Component {
 						}}
 					/>
 					<div>
-					<label class="col-sm-2">Message : </label>
+					<label className="col-sm-2">Message : </label>
 					<input
 						type="textarea"
 						onChange={(event) => {
@@ -40,7 +40,7 @@ class NewPost extends Component {
 					/></div>
 				</div>
 				<div>
-					<label class="col-sm-2">start date : </label>
+					<label className="col-sm-2">start date : </label>
 					<input
 						type="date"
 						onChange={(event) => {
@@ -48,7 +48,7 @@ class NewPost extends Component {
 						}}
 					/>
 					<div>
-					<label class="col-sm-2">end date : </label>
+					<label className="col-sm-2">end date : </label>
 					<input
 						type="date"
 						onChange={(event) => {
@@ -57,7 +57,7 @@ class NewPost extends Component {
 					/></div>
 				</div>
 				<div>
-					<label class="col-sm-2">latitude : </label>
+					<label className="col-sm-2">latitude : </label>
 					<input
 						type="number"
 						onChange={(event) => {
@@ -65,7 +65,7 @@ class NewPost extends Component {
 						}}
 					/>
 					<div>
-					<label class="col-sm-2">longitude : </label>
+					<label className="col-sm-2">longitude : </label>
 					<input
 						type="number"
 						onChange={(event) => {
@@ -73,8 +73,8 @@ class NewPost extends Component {
 						}}
 					/></div>
 				</div>
-				<div class="col-sm-2">
-					<input type="submit" class="btn-success" value="Submit" />
+				<div className="col-sm-2">
+					<input type="submit" className="btn-success" value="Submit" />
 				</div>
 			</form>
 		);

@@ -1,0 +1,28 @@
+.map {
+    margin: auto;
+    border: 2px solid black;
+    border-radius: 10px;
+}
+
+
+.leaflet-container {
+    width: 75%;
+    height: 75vh;
+}
+
+.form-group {
+    width: 25rem;
+}
+
+#travelers-row {
+    margin: 0;
+}
+
+.form-row {
+    margin: 0;
+    margin-bottom: 2rem;
+}
+
+.search-button {
+    margin-left: 0rem;
+}

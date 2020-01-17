@@ -1,11 +1,11 @@
 import React ,{createRef, Component} from 'react'
 // import ReactDOM , { render } from 'react-dom';
-import { Map, Marker, Popup, TileLayer } from 'react-leaflet';
+import { Map, Marker, Popup, TileLayer, MapControl } from 'react-leaflet';
+import ReactLeafletSearch from "react-leaflet-search";
 import Search from "react-leaflet-search";
 import axios from "axios";
 import Button from 'react-bootstrap/Button';
 import "./SearchTravelers.css"
-
 
 // var greenIcon = L.icon({
 //   iconUrl: 'leaf-green.png',
@@ -26,8 +26,7 @@ class SearchTravelers extends Component {
         radius: 0,
         start_date: '',
         end_date: '',
-        point: [[-76.300003, -148.000000]],
-        searchPoint: [[-76.300003, -148.000000]]
+        point: [[19.4100819, -99.1630388]],
       };
       constructor() {
         super()
@@ -35,9 +34,11 @@ class SearchTravelers extends Component {
       
 
     getDistance(origin, destination) {
+      console.log('in get distance')
+      console.log(origin);
+      let o1 = origin[0]*1.0;
+      let o2 = origin[1]*1.0;
       // Return distance in km
-      let o1 = origin[0].lat*1.0;
-      let o2 = origin[0].lng*1.0;
       let d1 = destination[0]*1.0;
       let d2 = destination[1]*1.0;
 
@@ -60,8 +61,22 @@ class SearchTravelers extends Component {
     return degree*Math.PI/180;
   }
 
+  leafletSearchRef = createRef();
+  mapRef = createRef();
+
     showPostsInArea = (e) => {
-      var point = this.state.point;
+      console.log('in show posts')
+      // console.log(this.leafletSearchRef.current.SearchInfo.latLng);
+      // console.log(this.leafletSearchRef.current.SearchInfo);
+      var point;
+      if (this.leafletSearchRef.current){
+        point =  [this.state.point[0].lat,this.state.point[0].lng];
+      }else {
+        point=[this.leafletSearchRef.current.SearchInfo.latLng.lat,this.leafletSearchRef.current.SearchInfo.latLng.lng];
+        this.leafletSearchRef.current.SearchInfo=null;
+      }
+      console.log(point);
+      
       var radius = this.state.radius;
       var startD = this.state.start_date;
       var endD = this.state.end_date;
@@ -72,18 +87,54 @@ class SearchTravelers extends Component {
     }
 
 
+    // addMarker = (e) => {
+      
+    //   let map = this.mapRef.current;
+    //   console.log(map.leafletElement)
+    //   // Marker.([50.5, 30.5]).addTo(this.mapRef.current);
+    //   let point;
+    //   console.log(reactLeafletSearch.SearchInfo);
+    //   if (reactLeafletSearch.SearchInfo){
+    //     let ee = reactLeafletSearch.SearchInfo.latLng;
+    //     console.log(ee)
+    //     point = reactLeafletSearch.SearchInfo.latLng;
+    //     reactLeafletSearch.SearchInfo = null;
+    //   }
+    //   else {
+    //     point = e.latlng;
+    //   }
+    //   // console.log(e.target)
+    //   this.setState(
+    //     {point});
+
+    //     // console.log(this.refs.search.leafletElement);
+    //     // const map = this.mapRef.current
+    //     // if (map != null) {
+    //       // console.log(map.leafletElement);
+    //     // }
+    // }
+
+    
+
     addMarker = (e) => {
-      console.log(e.target)
       let point = this.state.point;
       point.pop();
       point.push(e.latlng);
       this.setState(
         {point});
-        // console.log(this.refs.search.leafletElement);
-        const map = this.mapRef.current
-        if (map != null) {
-          // console.log(map.leafletElement);
-        }
+      // const {markers} = this.state
+      // let reactLeafletSearch = this.leafletSearchRef.current;
+      // while (markers.length > 0) markers.pop();
+      // if (reactLeafletSearch.SearchInfo){
+      //   console.log(reactLeafletSearch.SearchInfo)
+      //   markers.push(reactLeafletSearch.SearchInfo.latLng);
+      //   reactLeafletSearch.SearchInfo = null;
+      // }
+      // else {
+      //   markers.push(e.latlng)
+      // }
+      // this.setState({markers})
+      // console.log(this.state.markers)
     }
 
     setElementDates(e){
@@ -94,6 +145,7 @@ class SearchTravelers extends Component {
     }
 
    componentDidMount() {
+     console.log(Map);
     axios.get("http://127.0.0.1:5000/locations")
       .then(response => {
         response.data.forEach(e => this.setElementDates(e));
@@ -107,48 +159,14 @@ class SearchTravelers extends Component {
       });
   } 
 
-  mapRef = createRef();
+  
 
-  myPopup(SearchInfo) {
-    var loc=this._getLocation(this._input.value);
-    console.log(loc);
-    this.setState({point: loc});
-    // console.log(SearchInfo)
-    // let searchPoint = [SearchInfo.latLng.lat,SearchInfo.latLng.lng];
-    // searchPoint.pop();
-    // searchPoint.push();
-    // this.setState();
-    // this.setState(() => {
-      // Important: read `state` instead of `this.state` when updating.
-    //   return {searchPoint: [SearchInfo.latLng.lat,SearchInfo.latLng.lng]}
-    // });
-    // let point = [SearchInfo.latLng.lat,SearchInfo.latLng.lng];
-    // console.log(point)
-    // this.setState({point})
-    // let point = this.state.point;
-    // point.pop();
-    //     point.push([SearchInfo.latLng[0],SearchInfo.latLng[1]]);
-    // this.setState({point})
-    // console.log(this.state.point);
-    // return(
-    //   <Popup>
-    //     <div>
-    //       <p>I am a custom popUp</p>
-    //       <p>latitude and longitude from search component: lat:{SearchInfo.latLng[0]} lng:{SearchInfo.latLng[1]}</p>
-    //       <p>Info from search component: {SearchInfo.info}</p>
-    //       <p>{JSON.stringify(SearchInfo.raw)}</p>
-    //     </div>
-    //   </Popup>
-    // );
+  updateMarker = () => {
+    console.log('in update marker')
+    if (this.state.point) return this.state.point;
+    return [0,0];
   }
-
-  clickedSearch = (e) => {
-    console.log(e.target.value);
-    const map = this.mapRef.current
-    if (map != null) {
-      console.log(map.leafletElement);
-    }
-  }
+  
   
   render() {
     const position = [32.776520,35.022610];
@@ -202,33 +220,35 @@ class SearchTravelers extends Component {
         <div className="col-8">
         <Map 
         className="map"
+        ref={this.mapRef}
         center={position} 
         zoom={this.state.zoom} 
-        onClick={this.addMarker.bind(this)}
+        onClick={this.addMarker}
         >
           <TileLayer
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             url='https://{s}.tile.osm.org/{z}/{x}/{y}.png'
             />
-            <Search
+            <ReactLeafletSearch
             closeResultsOnClick={true}
             openSearchOnLoad={true}
-        ref={this.mapRef}
-            onClick={this.clickedSearch}
-            // ref="search"
-            // popUp={this.myPopup.bind(this)}
+            ref={this.leafletSearchRef}
+            // onClick={this.clickedSearch}
+            // popUp={this.myPopup}
             />
-            {this.state.point.map((position) =>(
-              <>
-              <Marker position={position}/>
-              </>
-            ))}
+            {this.state.point.map(position => 
+            <Marker position={position}></Marker>
+            )}
+              // {/* <>
+              // <Marker position={this.updateMarker}/>
+              // </> */}
+        
 
-          {this.state.filteredLocations.map(loc =>(
+          {this.state.filteredLocations.map(loc =>( 
             <>
               <Marker  position={[loc[0],loc[1]]}/>
             </>
-          ))}
+        ))}
         </Map>
           </div>
         </div>

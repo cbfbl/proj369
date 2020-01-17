@@ -127,7 +127,6 @@ def regipost():
     new_user.password = data['password']
     db.session.add(new_user)
     db.session.commit()
-    print(new_user.id)
     if new_user.id == None:
         db.session.rollback()
         problem = True

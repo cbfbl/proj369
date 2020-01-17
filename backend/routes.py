@@ -273,11 +273,12 @@ def edit_post():
 
 @backend.route('/post/subscribe', methods=['POST'])
 def subscribe_post():
-    return 'nothing'
     data = request.get_json()
     if data['current_user_id']!=current_user.id :
         abort(403)
     # if post id exist
+    if current_user_id not in data or subscribed_post_id not in data:
+        abort(400)
     sub = Subscribe(user_id=data['current_user_id'], post_id=data['subscribed_post_id'])
     db.session.add(sub)
     db.session.commit()

@@ -39,8 +39,8 @@ def login():
     user = User.query.filter_by(email=user_email).first()
     if user is not None and user.verify_password(password):
         login_user(user,remember=True)
-        access_token = create_access_token(identity={'id':user.id})
-        return access_token
+        access_token = create_access_token(identity={'id': user.id})
+        return jsonify({'token' : access_token , 'result' : 'created' })
     abort(401)
 
 
@@ -110,7 +110,6 @@ def register():
 @backend.route('/user/regipost', methods=['POST'])
 def regipost():
     data = request.get_json()
-    print(data)
     problem = False
     if not data or not 'password' in data or not 'username' in data or not 'first_name' in data \
             or not 'last_name' in data or not 'gender' in data or not 'birth_date' in data or not 'email' in data:
@@ -173,9 +172,6 @@ def edit_user():
     db.session.commit()
     return "edited"
 
-
-    
-
 @backend.route('/user/delete',methods=['POST'])
 def delete_user():
     data = request.get_json()
@@ -184,6 +180,7 @@ def delete_user():
     user = User.query.filter_by(id=current_user.id).first()
     db.session.delete(user)
     db.session.commit()
+    logout_user()
     return "deleted"
 
 @backend.route('/follow/<int:user_id>', methods=['POST'])
@@ -220,8 +217,9 @@ def posts(post_user_id):
     following_users = Follow.query.filter_by(follower=post_user_id)
     ret_posts = []
     for user_follower in following_users:
-        current_posts = Post.query.filter_by(user_id=user_follower.follower).all()
-        ret_posts.append(current_posts.to_dict())
+        current_posts = Post.query.filter_by(user_id=user_follower.followed).all()
+        for post in current_posts:
+            ret_posts.append(post.to_dict())
     for post in user_posts:
         ret_posts.append(post.to_dict())
     return jsonify(ret_posts)
@@ -272,7 +270,19 @@ def edit_post():
     post.end_date = data['end_date']
     db.session.commit()
     return 'edited'				
-					
+
+@backend.route('/post/subscribe', methods=['POST'])
+def subscribe_post():
+    return 'nothing'
+    data = request.get_json()
+    if data['current_user_id']!=current_user.id :
+        abort(403)
+    # if post id exist
+    sub = Subscribe(user_id=data['current_user_id'], post_id=data['subscribed_post_id'])
+    db.session.add(sub)
+    db.session.commit()
+
+    return 'subscribed'		
 
 @backend.route('/printposts', methods=['GET'])
 def print_posts():

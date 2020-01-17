@@ -11,6 +11,7 @@ import jsonpickle
 
 db.create_all()
 
+
 @backend.route('/')
 def index():
     return render_template('index.html', title="pigdz", user="Bos")
@@ -33,7 +34,7 @@ def login():
     user_data = request.get_json()
     if not user_data or not 'password' in user_data or not 'email' in user_data:
         print("Missing data")
-        abort(400)
+        abort(401)
     user_email = user_data['email']
     password = user_data['password']
     user = User.query.filter_by(email=user_email).first()
@@ -41,7 +42,7 @@ def login():
         login_user(user,remember=True)
         access_token = create_access_token(identity={'id':user.id})
         return access_token
-    abort(400)
+    abort(401)
 
 
 @backend.route('/printusers',methods=['GET'])
@@ -94,7 +95,7 @@ def register():
     data = request.get_json()
     if not data or not 'password' in data or not 'username' in data or not 'first_name' in data \
             or not 'last_name' in data or not 'gender' in data or not 'birth_date' in data or not 'email' in data:
-        abort(400)
+        abort(401)
     check_user = User.query.filter_by(email=data['email']).first()
     if check_user:
         return 'Email Taken'
@@ -121,6 +122,9 @@ def get_user(user_id):
 @backend.route('/follow/<int:user_id>', methods=['POST'])
 @login_required
 def follow(user_id):
+    # user = User.query.filter_by(id=user_id).first()
+    # if not user:
+    #     abort(404)
     new_follow = Follow(follower=current_user.id, followed=user_id)
     db.session.add(new_follow)
     db.session.commit()
@@ -130,7 +134,13 @@ def follow(user_id):
 @backend.route('/unfollow/<int:user_id>', methods=['POST'])
 @login_required
 def unfollow(user_id):
-    Follow.query.filter_by(follower=current_user.id,followed=user_id).delete()
+    # user = User.query.filter_by(id=user_id).first()
+    # if not user:
+    #     abort(404)
+    # fol = Follow.query.filter_by(follower=current_user.id,followed=user_id)
+    # if not fol:
+    #     return abort(404)
+    Follow.query.filter_by(follower=current_user.id, followed=user_id).delete()
     db.session.commit()
     return jsonify({'sometext' : "Hello"})
 
@@ -160,6 +170,9 @@ def posts(post_user_id):
 @backend.route('/post/new', methods=['POST'])
 def new_post():
     data = request.get_json()
+    # if not data or not 'title' in data or not 'body' in data or not 'latitude' in data \
+    #         or not 'longitude' in data or not 'start_date' in data or not 'end_date' in data:
+    #     abort(401)
     start_date_list = data['start_date'].split('-')
     end_date_list = data['end_date'].split('-')
     p_start_date = datetime.datetime(int(start_date_list[0]),int(start_date_list[1]),int(start_date_list[2]))
@@ -193,22 +206,28 @@ def delete_post():
     db.session.commit()
     return "deleted"
 
-
+# error occurs when the server has internal error
 @backend.errorhandler(500)
 def internal_error(e):
     return "500 Error"
 
-
+# error occurs when the server gets the request and understand it but
+# don't do anything about it
 @backend.errorhandler(403)
 def internal_error(e):
     return "403 Error"
 
-
+# error occurs when the pafe isn't exists
 @backend.errorhandler(404)
 def internal_error(e):
     return "404 Error"
 
-
+# error occurs when the page couldn't be found because a problem in the address
 @backend.errorhandler(400)
 def internal_error(e):
     return "400 Error"
+
+# error occurs when the user isn't allowed to approach the page, because he didn't insert info right.
+@backend.errorhandler(401)
+def internal_error(e):
+    return "401 Error"

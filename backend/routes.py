@@ -11,6 +11,22 @@ import jsonpickle
 db.create_all()
 
 
+class InvalidUsage(Exception):
+    status_code = 500
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+
 @backend.route('/')
 def index():
     return render_template('index.html', title="pigdz", user="Bos")
@@ -33,7 +49,7 @@ def login():
     user_data = request.get_json()
     if not user_data or not 'password' in user_data or not 'email' in user_data:
         print("Missing data")
-        abort(401)
+        raise InvalidUsage('You are Unauthorized Missing data', status_code=401)
     user_email = user_data['email']
     password = user_data['password']
     user = User.query.filter_by(email=user_email).first()
@@ -41,13 +57,13 @@ def login():
         login_user(user,remember=True)
         access_token = create_access_token(identity={'id':user.id})
         return access_token
-    abort(401)
+    raise InvalidUsage('You are Unauthorized', status_code=401)
 
 
 @backend.route('/printusers',methods=['GET'])
 def usersInfo():
     users = User.query.all()
-    for user in users :
+    for user in users:
         print(user.username,user.email)
     return 'Printed users in server console'
 
@@ -63,6 +79,8 @@ def get_users():
 
 @backend.route('/userslist',methods=['GET'])
 def get_list_users():
+    # if not current_user.is_authenticated:
+    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     users = User.query.all()
     list_users = []
     for user in users:
@@ -72,6 +90,8 @@ def get_list_users():
 
 @backend.route('/locations',methods=['GET'])
 def travel_locations():
+    # if not current_user.is_authenticated:
+    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     locations_list = []
     posts = Post.query.all()
     for post in posts:
@@ -81,9 +101,26 @@ def travel_locations():
     return jsonpickle.encode(locations_list)
 
 
+@backend.route('/filteredlocations',methods=['GET'])
+def filtered_locations():
+    # if not current_user.is_authenticated:
+    #     raise InvalidUsage('You are Unauthorized', status_code=401)
+    relevant_posts = []
+    locations_list = []
+    users_followed = Follow.query.filter_by(follower=current_user.id).all()
+    for user_id in users_followed:
+        relevant_posts.extend(Post.query.filter_by(user_id=user_id.followed).all())
+    for post in relevant_posts:
+        start_date = post.start_date.strftime("%Y-%m-%d")
+        end_date = post.end_date.strftime("%Y-%m-%d")
+        locations_list.append([post.latitude, post.longitude,start_date,end_date])
+    return jsonpickle.encode(locations_list)
+
+
 @backend.route('/logout',methods=['GET'])
 @login_required
 def logout():
+    print('im in logout')
     logout_user()
     return 'logged out',201
 
@@ -93,7 +130,7 @@ def register():
     data = request.get_json()
     if not data or not 'password' in data or not 'username' in data or not 'first_name' in data \
             or not 'last_name' in data or not 'gender' in data or not 'birth_date' in data or not 'email' in data:
-        abort(401)
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     check_user = User.query.filter_by(email=data['email']).first()
     if check_user:
         return 'Email Taken'
@@ -107,6 +144,7 @@ def register():
     db.session.commit()
     return 'Created'
 
+
 @backend.route('/user/regipost', methods=['POST'])
 def regipost():
     data = request.get_json()
@@ -114,7 +152,7 @@ def regipost():
     problem = False
     if not data or not 'password' in data or not 'username' in data or not 'first_name' in data \
             or not 'last_name' in data or not 'gender' in data or not 'birth_date' in data or not 'email' in data:
-        abort(400)
+        raise InvalidUsage('Couldnt find this page', status_code=400)
     check_user = User.query.filter_by(email=data['email']).first()
     if check_user:
         return 'Email Taken'
@@ -131,7 +169,7 @@ def regipost():
     if new_user.id == None:
         db.session.rollback()
         problem = True
-        abort(400)
+        raise InvalidUsage('Couldnt find this page', status_code=400)
     start_date_list = data['post_start_date'].split('-')
     end_date_list = data['post_end_date'].split('-')
     p_start_date = datetime.datetime(int(start_date_list[0]),int(start_date_list[1]),int(start_date_list[2]))
@@ -142,46 +180,62 @@ def regipost():
     db.session.add(new_post)
     if problem:
         db.session.rollback()
-        abort(400)
+        raise InvalidUsage('Couldnt find this page', status_code=400)
     db.session.commit()
     return 'Created'
 
+
 @backend.route("/user/<string:name>", methods=['GET'])
 def get_user_id(name):
+
+    # if not current_user.is_authenticated:
+        # raise InvalidUsage('You are Unauthorized', status_code=401)
     user = User.query.filter_by(username=name).first()
     if not user:
-        abort(404)
+        raise InvalidUsage('This page don\'t exists', status_code=404)
     return jsonify({'id': user.id})
+
 
 @backend.route('/user/<int:user_id>',methods=['GET'])
 def get_user(user_id):
+    # if not current_user.is_authenticated:
+    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     user = User.query.filter_by(id=user_id).first()
+    is_follower = Follow.query.filter_by(follower=current_user.id, followed=user_id).first()
+    if not (current_user.id == user_id):
+        if not is_follower:
+            return jsonify(username=user.username,id=user.id)
     if not user:
-        abort(404)
+        raise InvalidUsage('This page dont exists', status_code=404)
     p = user.to_dict()
     return jsonify(user.to_dict())
 
+
 @backend.route('/user/edit', methods=['PUT'])
 def edit_user():
+    # if not current_user.is_authenticated:
+    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     if data['current_user_id'] != current_user.id :
-        abort(403)
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     user = User.query.filter_by(id=current_user.id).first()
     if user == None:
         return "no user"
     user.first_name = data['first_name']
     user.last_name = data['last_name']
     db.session.commit()
-    return "edited"
-
-
-    
+    resp = jsonify(success=True, status_code=200)
+    # resp.status_code = 200;
+    # return resp
+    return "Created"
 
 @backend.route('/user/delete',methods=['POST'])
 def delete_user():
+    # if not current_user.is_authenticated:
+    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     if data['current_user_id'] != current_user.id :
-        abort(403)
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     user = User.query.filter_by(id=current_user.id).first()
     db.session.delete(user)
     db.session.commit()
@@ -217,8 +271,11 @@ def unfollow(user_id):
 @backend.route('/post/posts/<int:post_user_id>',methods=['GET'])
 def posts(post_user_id):
     #if user_id in db
+    print(post_user_id)
     user_posts = Post.query.filter_by(user_id=post_user_id).all()
+    print(user_posts)
     following_users = Follow.query.filter_by(follower=post_user_id)
+    print(following_users)
     ret_posts = []
     for user_follower in following_users:
         current_posts = Post.query.filter_by(user_id=user_follower.follower).all()
@@ -227,17 +284,23 @@ def posts(post_user_id):
         ret_posts.append(post.to_dict())
     return jsonify(ret_posts)
 
+
 @backend.route('/post/<int:post_id>', methods=['GET'])
 def get_post(post_id):
     post = Post.query.filter_by(id=post_id).first()
     return jsonify(post.to_dict())
 
+
 @backend.route('/post/new', methods=['POST'])
 def new_post():
+    # if current_user.is_authenticated:
+    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     # if not data or not 'title' in data or not 'body' in data or not 'latitude' in data \
     #         or not 'longitude' in data or not 'start_date' in data or not 'end_date' in data:
     #     abort(401)
+    if data['current_user_id'] != current_user.id:
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     start_date_list = data['start_date'].split('-')
     end_date_list = data['end_date'].split('-')
     p_start_date = datetime.datetime(int(start_date_list[0]),int(start_date_list[1]),int(start_date_list[2]))
@@ -249,21 +312,27 @@ def new_post():
     db.session.commit()
     return 'Created'
 
+
 @backend.route('/post/delete',methods=['POST'])
 def delete_post():
+    # if current_user.is_authenticated:
+    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     if data['current_user_id']!=current_user.id:
-        abort(403)
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     post = Post.query.filter_by(id=data['deleted_post_id']).first()
     db.session.delete(post)
     db.session.commit()
     return "deleted"
 
+
 @backend.route('/post/edit', methods=['PUT'])
 def edit_post():
+    # if not current_user.is_autenticated:
+    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     if data['current_user_id']!=current_user.id :
-        abort(403)
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     post = Post.query.filter_by(id=data['post_id']).first()
     post.body = data['body']
     post.title = data['title']
@@ -273,7 +342,7 @@ def edit_post():
     post.end_date = data['end_date']
     db.session.commit()
     return 'edited'				
-					
+
 
 @backend.route('/printposts', methods=['GET'])
 def print_posts():
@@ -281,30 +350,11 @@ def print_posts():
     for post in posts:
         print(post.to_dict())
     return 'Printed posts to server console'
-    return "deleted"
+    # return "deleted"
 
-# error occurs when the server has internal error
-@backend.errorhandler(500)
-def internal_error(e):
-    return "500 Error"
 
-# error occurs when the server gets the request and understand it but
-# don't do anything about it
-@backend.errorhandler(403)
-def internal_error(e):
-    return "403 Error"
-
-# error occurs when the pafe isn't exists
-@backend.errorhandler(404)
-def internal_error(e):
-    return "404 Error"
-
-# error occurs when the page couldn't be found because a problem in the address
-@backend.errorhandler(400)
-def internal_error(e):
-    return "400 Error"
-
-# error occurs when the user isn't allowed to approach the page, because he didn't insert info right.
-@backend.errorhandler(401)
-def internal_error(e):
-    return "401 Error"
+@backend.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response

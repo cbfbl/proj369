@@ -6,13 +6,15 @@ export const login = user => {
   return axios
     .post("http://127.0.0.1:5000/login", {
       email: user.email,
-      password: user.password
+      password: user.password,
+      crossDomain: true
     })
     .then(response => {
       localStorage.setItem("usertoken", response.data);
       return response.data;
     })
     .catch(err => {
+      alert(err);
       console.log(err);
       return "error";
     });

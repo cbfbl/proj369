@@ -38,6 +38,7 @@ class Autocomplete extends Component {
         });
       })
       .catch(err => {
+        // alert(err);
         console.error(err);
       });
   } 
@@ -48,6 +49,8 @@ class Autocomplete extends Component {
     // const { suggestions } = this.props.suggestions;
     const userInput = e.currentTarget.value;
     // Filter our suggestions that don't contain the user's input
+    
+
     const filteredSuggestions = this.state.suggestions.filter(
       suggestion => 
         suggestion.toLowerCase().indexOf(userInput.toLowerCase()) > -1

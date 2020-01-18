@@ -421,12 +421,11 @@ class Postpage extends Component {
 			<div className="postfeed">
 				<Row>
 					<Col>
+						<h3>Create New Post</h3>
 						<NewPostRouter />
 					</Col>
 					<Col>
 						<PostFeedRouter />
-						<h3>Create New Post</h3>
-						<NewPost onSubmit={this.onSubmit} />
 					</Col>
 				</Row>
 			</div>

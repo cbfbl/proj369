@@ -170,10 +170,10 @@ class Post extends Component {
 		if (user_token) {
 			decoded = jwt_decode(user_token);
 			const logged_user_id = decoded.identity.id;
-			if (logged_user_id === this.state.uploader_id) {
+			if (logged_user_id !== this.state.uploader_id) {
 				axios.defaults.withCredentials = true;
 				axios
-					.post(flask_server_adress + '/post/subscribe/', {
+					.post(flask_server_adress + '/post/subscribe', {
 						subscribed_post_id: this.state.id,
 						current_user_id: logged_user_id
 					})

@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required , current_user
 from backend import backend, db, login_manager
-from backend.models import User, Post, Follow
+from backend.models import User, Post, Follow,Subscribe
 from flask_jwt_extended import (create_access_token)
 import datetime
 import jsonpickle
@@ -277,13 +277,33 @@ def subscribe_post():
     if data['current_user_id']!=current_user.id :
         abort(403)
     # if post id exist
-    if current_user_id not in data or subscribed_post_id not in data:
+    if 'current_user_id' not in data or 'subscribed_post_id' not in data:
         abort(400)
-    sub = Subscribe(user_id=data['current_user_id'], post_id=data['subscribed_post_id'])
+    sub = Subscribe(user_id=data['current_user_id'], post_id=data['subscribed_post_id'],edited=False)
     db.session.add(sub)
     db.session.commit()
-
     return 'subscribed'		
+
+@backend.route('/printsubscribes')
+def print_subscribes():
+    subscribes = Subscribe.query.all()
+    for subscribe in subscribes:
+        print(subscribe.user_id,subscribe.post_id)
+    return "printed subscriptions in server console"
+
+@backend.route('/notifications/<int:logged_user_id>')
+def get_edited_posts(logged_user_id):
+    if logged_user_id != current_user.id:
+        abort(403)
+    subscribes = Subscribe.query.filter_by(user_id=logged_user_id)
+    post_list = []
+    for subscribe in subscribes:
+        if subscribe.edited == True:
+            post_list.append(subscribe.post_id)
+
+    return jsonify({'id_array': post_list,'result':'success'})
+
+
 
 @backend.route('/printposts', methods=['GET'])
 def print_posts():

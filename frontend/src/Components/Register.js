@@ -205,7 +205,6 @@ class Register extends Component {
 		this.setState({
 			post_and_register: res
 		});
-		console.log(ev.target.checked);
 	}
 
 	render() {
@@ -298,6 +297,8 @@ class Register extends Component {
 									noValidate
 								/>
 							</div>
+							<label>register with post</label>
+							<input type="checkbox" name="regipost" onChange={this.changeRegibox} />
 							<h1 className="h3 mb-3 font-weight-normal">Register</h1>
 							<div className="form-group">
 								{this.state.invalid > 0 && (

@@ -95,7 +95,8 @@ class Subscribe(db.Model):
     __tablename__ = 'subscribes'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    post_id = db.Column(db.Integer,db.ForeignKey('posts.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    edited = db.Column(db.Boolean)
 
-# db.drop_all()
+#db.drop_all()
 db.create_all()

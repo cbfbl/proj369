@@ -269,6 +269,10 @@ def edit_post():
     post.start_date = data['start_date']
     post.end_date = data['end_date']
     db.session.commit()
+    subscribes = Subscribe.query.filter_by(post_id = data['post_id'])
+    for subscribe in subscribes:
+        subscribe.edited = True
+    db.session.commit()
     return 'edited'				
 
 @backend.route('/post/subscribe', methods=['POST'])
@@ -279,6 +283,8 @@ def subscribe_post():
     # if post id exist
     if 'current_user_id' not in data or 'subscribed_post_id' not in data:
         abort(400)
+    if Subscribe.query.filter_by(user_id=data['current_user_id'], post_id=data['subscribed_post_id']):
+        return 'already subscribed'
     sub = Subscribe(user_id=data['current_user_id'], post_id=data['subscribed_post_id'],edited=False)
     db.session.add(sub)
     db.session.commit()
@@ -288,7 +294,7 @@ def subscribe_post():
 def print_subscribes():
     subscribes = Subscribe.query.all()
     for subscribe in subscribes:
-        print(subscribe.user_id,subscribe.post_id)
+        print(subscribe.user_id,subscribe.post_id,subscribe.edited)
     return "printed subscriptions in server console"
 
 @backend.route('/notifications/<int:logged_user_id>')

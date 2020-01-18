@@ -57,7 +57,7 @@ def login():
         login_user(user,remember=True)
         access_token = create_access_token(identity={'id': user.id})
         return jsonify({'token' : access_token , 'result' : 'created' })
-      raise InvalidUsage('You are Unauthorized Missing data', status_code=401)
+    raise InvalidUsage('You are Unauthorized Missing data', status_code=401)
 
 
 @backend.route('/printusers',methods=['GET'])

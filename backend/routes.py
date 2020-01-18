@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required , current_user
 from backend import backend, db, login_manager
-from backend.models import User, Post, Follow
+from backend.models import User, Post, Follow,Subscribe
 from flask_jwt_extended import (create_access_token)
 import datetime
 import jsonpickle
@@ -55,9 +55,9 @@ def login():
     user = User.query.filter_by(email=user_email).first()
     if user is not None and user.verify_password(password):
         login_user(user,remember=True)
-        access_token = create_access_token(identity={'id':user.id})
-        return access_token
-    raise InvalidUsage('You are Unauthorized', status_code=401)
+        access_token = create_access_token(identity={'id': user.id})
+        return jsonify({'token' : access_token , 'result' : 'created' })
+      raise InvalidUsage('You are Unauthorized Missing data', status_code=401)
 
 
 @backend.route('/printusers',methods=['GET'])
@@ -148,7 +148,6 @@ def register():
 @backend.route('/user/regipost', methods=['POST'])
 def regipost():
     data = request.get_json()
-    print(data)
     problem = False
     if not data or not 'password' in data or not 'username' in data or not 'first_name' in data \
             or not 'last_name' in data or not 'gender' in data or not 'birth_date' in data or not 'email' in data:
@@ -165,7 +164,6 @@ def regipost():
     new_user.password = data['password']
     db.session.add(new_user)
     db.session.commit()
-    print(new_user.id)
     if new_user.id == None:
         db.session.rollback()
         problem = True
@@ -224,10 +222,7 @@ def edit_user():
     user.first_name = data['first_name']
     user.last_name = data['last_name']
     db.session.commit()
-    resp = jsonify(success=True, status_code=200)
-    # resp.status_code = 200;
-    # return resp
-    return "Created"
+    return "edited"
 
 @backend.route('/user/delete',methods=['POST'])
 def delete_user():
@@ -239,6 +234,7 @@ def delete_user():
     user = User.query.filter_by(id=current_user.id).first()
     db.session.delete(user)
     db.session.commit()
+    logout_user()
     return "deleted"
 
 @backend.route('/follow/<int:user_id>', methods=['POST'])
@@ -278,8 +274,9 @@ def posts(post_user_id):
     print(following_users)
     ret_posts = []
     for user_follower in following_users:
-        current_posts = Post.query.filter_by(user_id=user_follower.follower).all()
-        ret_posts.append(current_posts.to_dict())
+        current_posts = Post.query.filter_by(user_id=user_follower.followed).all()
+        for post in current_posts:
+            ret_posts.append(post.to_dict())
     for post in user_posts:
         ret_posts.append(post.to_dict())
     return jsonify(ret_posts)
@@ -331,6 +328,7 @@ def edit_post():
     # if not current_user.is_autenticated:
     #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
+    print(data)
     if data['current_user_id']!=current_user.id :
         raise InvalidUsage('You are Unauthorized', status_code=401)
     post = Post.query.filter_by(id=data['post_id']).first()
@@ -341,8 +339,57 @@ def edit_post():
     post.start_date = data['start_date']
     post.end_date = data['end_date']
     db.session.commit()
+    subscribes = Subscribe.query.filter_by(post_id=data['post_id'])
+    for subscribe in subscribes:
+        subscribe.edited = True
+    db.session.commit()
     return 'edited'				
 
+@backend.route('/post/subscribe', methods=['POST'])
+def subscribe_post():
+    data = request.get_json()
+    if not data or 'current_user_id' not in data or 'subscribed_post_id' not in data:
+        abort(400)
+    if data['current_user_id']!=current_user.id :
+        abort(403)
+    # if post id exist
+    if Subscribe.query.filter_by(user_id=data['current_user_id'], post_id=data['subscribed_post_id']):
+        return 'already subscribed'
+    sub = Subscribe(user_id=data['current_user_id'], post_id=data['subscribed_post_id'],edited=False)
+    db.session.add(sub)
+    db.session.commit()
+    return 'subscribed'		
+
+@backend.route('/printsubscribes',methods=['GET'])
+def print_subscribes():
+    subscribes = Subscribe.query.all()
+    for subscribe in subscribes:
+        print(subscribe.user_id,subscribe.post_id,subscribe.edited)
+    return "printed subscriptions in server console"
+
+@backend.route('/notifications/<int:logged_user_id>',methods=['GET'])
+def get_edited_posts(logged_user_id):
+    if logged_user_id != current_user.id:
+        abort(403)
+    subscribes = Subscribe.query.filter_by(user_id=logged_user_id)
+    post_list = []
+    for subscribe in subscribes:
+        if subscribe.edited == True:
+            post_list.append(subscribe.post_id)
+
+    return jsonify({'id_array': post_list,'result':'success'})
+
+@backend.route('/notification/delete', methods=['POST'])
+def remove_notification():
+    data = request.get_json()
+    if not data or 'user_id' not in data or 'post_id' not in data:
+        abort(400)
+    if data['user_id'] != current_user.id:
+        abort(403)
+    subscribe = Subscribe.query.filter_by(user_id=data['user_id'], post_id=data['post_id']).first()
+    subscribe.edited = False
+    db.session.commit()
+    return 'deleted'
 
 @backend.route('/printposts', methods=['GET'])
 def print_posts():
@@ -350,8 +397,6 @@ def print_posts():
     for post in posts:
         print(post.to_dict())
     return 'Printed posts to server console'
-    # return "deleted"
-
 
 @backend.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):

@@ -32,13 +32,14 @@ class NewPost extends Component {
 						}}
 					/>
 					<div>
-					<label className="col-sm-2">Message : </label>
-					<input
-						type="textarea"
-						onChange={(event) => {
-							this.setState({ body: event.target.value });
-						}}
-					/></div>
+						<label className="col-sm-2">Message : </label>
+						<input
+							type="textarea"
+							onChange={(event) => {
+								this.setState({ body: event.target.value });
+							}}
+						/>
+					</div>
 				</div>
 				<div>
 					<label className="col-sm-2">start date : </label>
@@ -49,13 +50,14 @@ class NewPost extends Component {
 						}}
 					/>
 					<div>
-					<label className="col-sm-2">end date : </label>
-					<input
-						type="date"
-						onChange={(event) => {
-							this.setState({ end_date: event.target.value });
-						}}
-					/></div>
+						<label className="col-sm-2">end date : </label>
+						<input
+							type="date"
+							onChange={(event) => {
+								this.setState({ end_date: event.target.value });
+							}}
+						/>
+					</div>
 				</div>
 				<div>
 					<label className="col-sm-2">latitude : </label>
@@ -67,14 +69,15 @@ class NewPost extends Component {
 						}}
 					/>
 					<div>
-					<label className="col-sm-2">longitude : </label>
-					<input
-						type="number"
-						step="any"
-						onChange={(event) => {
-							this.setState({ longitude: event.target.value });
-						}}
-					/></div>
+						<label className="col-sm-2">longitude : </label>
+						<input
+							type="number"
+							step="any"
+							onChange={(event) => {
+								this.setState({ longitude: event.target.value });
+							}}
+						/>
+					</div>
 				</div>
 				<div className="col-sm-2">
 					<input type="submit" className="btn-success" value="Submit" />
@@ -164,7 +167,28 @@ class Post extends Component {
 	}
 
 	subscribe() {
-		console.log(this.state.title);
+		const user_token = localStorage.usertoken;
+		let decoded = '';
+		if (user_token) {
+			decoded = jwt_decode(user_token);
+			const logged_user_id = decoded.identity.id;
+			if (logged_user_id !== this.state.uploader_id) {
+				axios.defaults.withCredentials = true;
+				axios
+					.post(flask_server_adress + '/post/subscribe', {
+						subscribed_post_id: this.state.id,
+						current_user_id: logged_user_id
+					})
+					.then((response) => {
+						if (response.data === 'subscribed') {
+							this.props.history.push('/Post');
+						}
+					})
+					.catch((err) => {
+						console.log(err);
+					});
+			}
+		}
 	}
 	deletePost() {
 		const user_token = localStorage.usertoken;
@@ -402,12 +426,11 @@ class Postpage extends Component {
 			<div className="postfeed">
 				<Row>
 					<Col>
+						<h3>Create New Post</h3>
 						<NewPostRouter />
 					</Col>
 					<Col>
 						<PostFeedRouter />
-					<h3>Create New Post</h3>
-						<NewPost onSubmit={this.onSubmit} />
 					</Col>
 				</Row>
 			</div>

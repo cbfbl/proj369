@@ -85,12 +85,18 @@ class Post(db.Model):
     city = db.Column(db.String)
     start_date = db.Column(db.DateTime)
     end_date = db.Column(db.DateTime)
-    # subscribes = db.relationship('User', backref='subscribed')
+    subscribes = db.relationship('Subscribe',lazy='dynamic')
     def to_dict(self):
         return {'id': self.id, 'user_id': self.user_id, 'title': self.title, 'body': self.body, \
              'timestamp': self.timestamp, 'latitude': self.latitude, 'longitude': self.longitude, \
                  'city':self.city,'start_date':self.start_date,'end_date':self.end_date }
 
+class Subscribe(db.Model):
+    __tablename__ = 'subscribes'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    edited = db.Column(db.Boolean)
 
-# db.drop_all()
+#db.drop_all()
 db.create_all()

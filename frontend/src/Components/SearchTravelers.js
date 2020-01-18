@@ -1,8 +1,8 @@
 import React ,{createRef, Component} from 'react'
 // import ReactDOM , { render } from 'react-dom';
-import { Map, Marker, Popup, TileLayer, MapControl } from 'react-leaflet';
+import { Map, Marker, TileLayer } from 'react-leaflet';
 import ReactLeafletSearch from "react-leaflet-search";
-import Search from "react-leaflet-search";
+// import Search from "react-leaflet-search";
 import axios from "axios";
 import Button from 'react-bootstrap/Button';
 import "./SearchTravelers.css"
@@ -34,8 +34,8 @@ class SearchTravelers extends Component {
       
 
     getDistance(origin, destination) {
-      console.log('in get distance')
-      console.log(origin);
+      // console.log('in get distance')
+      // console.log(origin);
       let o1 = origin[0]*1.0;
       let o2 = origin[1]*1.0;
       // Return distance in km
@@ -65,9 +65,6 @@ class SearchTravelers extends Component {
   mapRef = createRef();
 
     showPostsInArea = (e) => {
-      console.log('in show posts')
-      // console.log(this.leafletSearchRef.current.SearchInfo.latLng);
-      // console.log(this.leafletSearchRef.current.SearchInfo);
       var point;
       if (this.leafletSearchRef.current){
         point =  [this.state.point[0].lat,this.state.point[0].lng];
@@ -75,7 +72,6 @@ class SearchTravelers extends Component {
         point=[this.leafletSearchRef.current.SearchInfo.latLng.lat,this.leafletSearchRef.current.SearchInfo.latLng.lng];
         this.leafletSearchRef.current.SearchInfo=null;
       }
-      console.log(point);
       
       var radius = this.state.radius;
       var startD = this.state.start_date;
@@ -86,34 +82,6 @@ class SearchTravelers extends Component {
       this.setState({filteredLocations});
     }
 
-
-    // addMarker = (e) => {
-      
-    //   let map = this.mapRef.current;
-    //   console.log(map.leafletElement)
-    //   // Marker.([50.5, 30.5]).addTo(this.mapRef.current);
-    //   let point;
-    //   console.log(reactLeafletSearch.SearchInfo);
-    //   if (reactLeafletSearch.SearchInfo){
-    //     let ee = reactLeafletSearch.SearchInfo.latLng;
-    //     console.log(ee)
-    //     point = reactLeafletSearch.SearchInfo.latLng;
-    //     reactLeafletSearch.SearchInfo = null;
-    //   }
-    //   else {
-    //     point = e.latlng;
-    //   }
-    //   // console.log(e.target)
-    //   this.setState(
-    //     {point});
-
-    //     // console.log(this.refs.search.leafletElement);
-    //     // const map = this.mapRef.current
-    //     // if (map != null) {
-    //       // console.log(map.leafletElement);
-    //     // }
-    // }
-
     
 
     addMarker = (e) => {
@@ -122,19 +90,6 @@ class SearchTravelers extends Component {
       point.push(e.latlng);
       this.setState(
         {point});
-      // const {markers} = this.state
-      // let reactLeafletSearch = this.leafletSearchRef.current;
-      // while (markers.length > 0) markers.pop();
-      // if (reactLeafletSearch.SearchInfo){
-      //   console.log(reactLeafletSearch.SearchInfo)
-      //   markers.push(reactLeafletSearch.SearchInfo.latLng);
-      //   reactLeafletSearch.SearchInfo = null;
-      // }
-      // else {
-      //   markers.push(e.latlng)
-      // }
-      // this.setState({markers})
-      // console.log(this.state.markers)
     }
 
     setElementDates(e){
@@ -145,16 +100,26 @@ class SearchTravelers extends Component {
     }
 
    componentDidMount() {
-     console.log(Map);
     axios.get("http://127.0.0.1:5000/locations")
       .then(response => {
         response.data.forEach(e => this.setElementDates(e));
         this.setState({
           locations: response.data,
-          filteredLocations: response.data
         });
       })
       .catch(err => {
+        alert(err);
+        console.error(err);
+      });
+      axios.get("http://127.0.0.1:5000/filteredlocations")
+      .then(response => {
+        response.data.forEach(e => this.setElementDates(e));
+        this.setState({
+          filteredLocations: response.data,
+        });
+      })
+      .catch(err => {
+        alert(err);
         console.error(err);
       });
   } 
@@ -162,7 +127,7 @@ class SearchTravelers extends Component {
   
 
   updateMarker = () => {
-    console.log('in update marker')
+    // console.log('in update marker')
     if (this.state.point) return this.state.point;
     return [0,0];
   }
@@ -239,11 +204,7 @@ class SearchTravelers extends Component {
             {this.state.point.map(position => 
             <Marker position={position}></Marker>
             )}
-              // {/* <>
-              // <Marker position={this.updateMarker}/>
-              // </> */}
-        
-
+            
           {this.state.filteredLocations.map(loc =>( 
             <>
               <Marker  position={[loc[0],loc[1]]}/>

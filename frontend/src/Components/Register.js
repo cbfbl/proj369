@@ -22,6 +22,7 @@ export const register = (newUser) => {
 			return response.data;
 		})
 		.catch((err) => {
+			alert(err);
 			console.log(err);
 		});
 };
@@ -47,6 +48,7 @@ export const registerAndPost = (newRegiPost) => {
 			return response.data;
 		})
 		.catch((err) => {
+			alert(err);
 			console.log(err);
 		});
 };
@@ -177,6 +179,7 @@ class Register extends Component {
 					}
 				})
 				.catch((err) => {
+					alert(err);
 					console.log(err);
 				});
 		} else if (validateForm(this.state.errors) && this.state.post_and_register) {
@@ -196,6 +199,7 @@ class Register extends Component {
 					}
 				})
 				.catch((err) => {
+					alert(err);
 					console.log(err);
 				});
 		} else {

@@ -11,6 +11,7 @@ export const getUser = (user) => {
 			return axios
 				.get('http://127.0.0.1:5000/user/' + response1.data.id)
 				.then((response2) => {
+					console.log(response2);
 					return response2.data;
 				})
 				.catch((err) => {

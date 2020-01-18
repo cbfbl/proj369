@@ -98,6 +98,7 @@ class NewPost extends Component {
 				this.props.history.push('/Post');
 			})
 			.catch((err) => {
+				alert(err);
 				console.log(err);
 			});
 	}
@@ -156,6 +157,7 @@ class Post extends Component {
 					});
 				})
 				.catch((err) => {
+					alert(err);
 					console.log(err);
 				});
 		}
@@ -183,6 +185,7 @@ class Post extends Component {
 						}
 					})
 					.catch((err) => {
+						alert(err);
 						console.log(err);
 					});
 			}
@@ -216,6 +219,7 @@ class Post extends Component {
 						}
 					})
 					.catch((err) => {
+						alert(err);
 						console.log(err);
 					});
 			}
@@ -355,6 +359,7 @@ class PostFeed extends Component {
 					this.setState({ posts: response.data });
 				})
 				.catch((err) => {
+					alert(err);
 					console.log(err);
 				});
 		}

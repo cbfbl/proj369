@@ -8,7 +8,7 @@ import Col from "react-bootstrap/Col";
 import Autocomplete from "./AutoComplete";
 // import Post from "./Post";
 // import SearchTravelers from "./SearchTravelers";
-import Users from "./users";
+// import Users from "./users";
 
 
 class Navbar extends Component {
@@ -19,15 +19,18 @@ class Navbar extends Component {
   };
   get_user() {
     this.setState({search_msg: "Search for a user"});
-    axios.defaults.withCredentials = true;
+    axios.defaults.withCredentials = true; 
     axios
-      .get("http://127.0.0.1:5000/user/" + this.state.username)
+      .get("http://127.0.0.1:5000/user/" + this.state.username, {
+        crossDomain: true
+    })
       .then(response => {
         this.setState({username: ""});
         this.props.history.push(`/users/` + response.data.id);
       })
       .catch(err => {
         this.setState({username: "", search_msg: "User not found"});
+        // alert(err);
       });
   }
 
@@ -39,12 +42,15 @@ class Navbar extends Component {
     e.preventDefault();
     axios.defaults.withCredentials = true;
     axios
-      .get("http://127.0.0.1:5000/logout")
+      .get("http://127.0.0.1:5000/logout", {
+        crossDomain: true
+    })
       .then(response => {
         localStorage.removeItem("usertoken");
         this.props.history.push(`/`);
       })
       .catch(err => {
+        alert(err);
         console.log(err);
       });
   }

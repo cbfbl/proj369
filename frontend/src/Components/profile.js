@@ -50,6 +50,7 @@ class Profile extends Component {
 				});
 			})
 			.catch((err) => {
+				alert(err);
 				console.log(err);
 			});
 	}
@@ -79,6 +80,7 @@ class Profile extends Component {
 						}
 					})
 					.catch((err) => {
+						alert(err);
 						console.log(err);
 					});
 			}
@@ -102,7 +104,7 @@ class Profile extends Component {
 				username: this.state.username,
 				first_name: this.state.firstname,
 				last_name: this.state.lastname
-			})
+			}, {crossDomain: true})
 			.then((response) => {
 				if (response.data === 'edited') {
 					this.setState({
@@ -112,6 +114,7 @@ class Profile extends Component {
 				}
 			})
 			.catch((err) => {
+				alert(err);
 				console.log(err);
 			});
 	}
@@ -138,14 +141,14 @@ class Profile extends Component {
 	render() {
 		const editting = (
 			<div>
-				<button onClick={this.editProfile}>Submit change</button>
-				<button onClick={this.toggleEditable}>Cancel changes</button>
+				<button className="btn-success" onClick={this.editProfile}>Submit change</button>
+				<button className="btn-success" onClick={this.toggleEditable}>Cancel changes</button>
 			</div>
 		);
 		const not_editting = (
 			<div>
-				<button onClick={this.deleteUser}>Delete account</button>
-				<button onClick={this.toggleEditable}>Edit Info</button>
+				<button className="btn-success" onClick={this.deleteUser}>Delete account</button>
+				<button className="btn-success" onClick={this.toggleEditable}>Edit Info</button>
 			</div>
 		);
 		const ret_editable = (
@@ -167,7 +170,7 @@ class Profile extends Component {
 			</div>
 		);
 		return (
-			<div style={{ color: 'black' }}>
+			<div style={{ color: 'white' }}>
 				<label>Username: </label>
 				{this.state.username}
 				<br />

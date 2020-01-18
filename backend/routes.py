@@ -267,11 +267,8 @@ def unfollow(user_id):
 @backend.route('/post/posts/<int:post_user_id>',methods=['GET'])
 def posts(post_user_id):
     #if user_id in db
-    print(post_user_id)
     user_posts = Post.query.filter_by(user_id=post_user_id).all()
-    print(user_posts)
     following_users = Follow.query.filter_by(follower=post_user_id)
-    print(following_users)
     ret_posts = []
     for user_follower in following_users:
         current_posts = Post.query.filter_by(user_id=user_follower.followed).all()
@@ -328,7 +325,6 @@ def edit_post():
     # if not current_user.is_autenticated:
     #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
-    print(data)
     if data['current_user_id']!=current_user.id :
         raise InvalidUsage('You are Unauthorized', status_code=401)
     post = Post.query.filter_by(id=data['post_id']).first()

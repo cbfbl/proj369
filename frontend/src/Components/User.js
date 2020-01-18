@@ -11,7 +11,6 @@ export const getUser = (user) => {
 			return axios
 				.get('http://127.0.0.1:5000/user/' + response1.data.id)
 				.then((response2) => {
-					console.log(response2);
 					return response2.data;
 				})
 				.catch((err) => {
@@ -25,7 +24,8 @@ export const getUser = (user) => {
 
 class User extends Component {
 	state = {
-		user: {}
+		user: {},
+		image: 'https://i.pinimg.com/236x/cb/33/49/cb3349b86ca661ca61ae9a36d88d70d4--ash-pokemon-pokemon-games.jpg'
 	};
 	followUser = () => {
 		const user_token = localStorage.usertoken;
@@ -61,7 +61,8 @@ class User extends Component {
 		getUser(this.props.match.params.user)
 			.then((res) => {
 				this.setState({
-					user: res
+					user: res,
+					image: res.image
 				});
 			})
 			.catch((err) => {
@@ -76,14 +77,26 @@ class User extends Component {
 	render() {
 		let user_info = [];
 		for (const key of Object.keys(this.state.user)) {
-			user_info.push(
-				<li key={key}>
-					{key} : {this.state.user[key]}
-				</li>
-			);
+			if (key !== 'image') {
+				user_info.push(
+					<li key={key}>
+						{key} : {this.state.user[key]}
+					</li>
+				);
+			}
 		}
+		//const pic_path = require('../images/default.png');
+
+		//const check = this.state.image;
+		//console.log(check);
+		//const second_quire = require(check);
+
 		return (
 			<div className="User-properties">
+				<br />
+				picture :
+				<img src={this.state.image} alt="No profile picture" width="128" height="128" />
+				<br />
 				user info : <ul>{user_info}</ul>
 				<Button variant="success" onClick={() => this.followUser()}>
 					Follow this user

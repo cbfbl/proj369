@@ -86,24 +86,33 @@ class NewPost extends Component {
 		);
 	}
 	onSubmit(e) {
-		e.preventDefault();
-		axios.defaults.withCredentials = true;
-		axios
-			.post(flask_server_adress + '/post/new', {
-				title: this.state.title,
-				body: this.state.body,
-				start_date: this.state.start_date,
-				end_date: this.state.end_date,
-				latitude: this.state.latitude,
-				longitude: this.state.longitude
-			})
-			.then((response) => {
-				this.props.history.push('/Post');
-			})
-			.catch((err) => {
-				alert(err);
-				console.log(err);
-			});
+		const user_token = localStorage.usertoken;
+		let decoded = '';
+		if (user_token) {
+			decoded = jwt_decode(user_token);
+			const logged_user_id = decoded.identity.id;
+			e.preventDefault();
+			axios.defaults.withCredentials = true;
+			axios
+				.post(flask_server_adress + '/post/new', {
+					current_user_id: logged_user_id,
+					title: this.state.title,
+					body: this.state.body,
+					start_date: this.state.start_date,
+					end_date: this.state.end_date,
+					latitude: this.state.latitude,
+					longitude: this.state.longitude
+				})
+				.then((response) => {
+					if (response.data === 'Created') {
+						this.props.history.push('/Post');
+					}
+				})
+				.catch((err) => {
+					alert(err);
+					console.log(err);
+				});
+		}
 	}
 }
 

@@ -289,8 +289,8 @@ def get_post(post_id):
 
 @backend.route('/post/new', methods=['POST'])
 def new_post():
-    # if current_user.is_authenticated:
-    #     raise InvalidUsage('You are Unauthorized', status_code=401)
+    if not current_user.is_authenticated:
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     # if not data or not 'title' in data or not 'body' in data or not 'latitude' in data \
     #         or not 'longitude' in data or not 'start_date' in data or not 'end_date' in data:

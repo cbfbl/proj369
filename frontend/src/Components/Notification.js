@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { flask_server_adress } from '../utils';
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
+import { withRouter } from 'react-router-dom';
 
 class Notification extends Component {
 	constructor() {
@@ -31,6 +32,11 @@ class Notification extends Component {
 				.catch((err) => {
 					console.log(err);
 				});
+		}
+	}
+	componentDidUpdate(prevProps) {
+		if (prevProps.location.pathname !== this.props.location.pathname) {
+			this.componentDidMount();
 		}
 	}
 	render() {
@@ -71,4 +77,4 @@ class Notification extends Component {
 	}
 }
 
-export default Notification;
+export default withRouter(Notification);

@@ -259,6 +259,7 @@ def delete_post():
 @backend.route('/post/edit', methods=['PUT'])
 def edit_post():
     data = request.get_json()
+    print(data)
     if data['current_user_id']!=current_user.id :
         abort(403)
     post = Post.query.filter_by(id=data['post_id']).first()
@@ -269,7 +270,7 @@ def edit_post():
     post.start_date = data['start_date']
     post.end_date = data['end_date']
     db.session.commit()
-    subscribes = Subscribe.query.filter_by(post_id = data['post_id'])
+    subscribes = Subscribe.query.filter_by(post_id=data['post_id'])
     for subscribe in subscribes:
         subscribe.edited = True
     db.session.commit()
@@ -278,11 +279,11 @@ def edit_post():
 @backend.route('/post/subscribe', methods=['POST'])
 def subscribe_post():
     data = request.get_json()
+    if not data or 'current_user_id' not in data or 'subscribed_post_id' not in data:
+        abort(400)
     if data['current_user_id']!=current_user.id :
         abort(403)
     # if post id exist
-    if 'current_user_id' not in data or 'subscribed_post_id' not in data:
-        abort(400)
     if Subscribe.query.filter_by(user_id=data['current_user_id'], post_id=data['subscribed_post_id']):
         return 'already subscribed'
     sub = Subscribe(user_id=data['current_user_id'], post_id=data['subscribed_post_id'],edited=False)
@@ -290,14 +291,14 @@ def subscribe_post():
     db.session.commit()
     return 'subscribed'		
 
-@backend.route('/printsubscribes')
+@backend.route('/printsubscribes',methods=['GET'])
 def print_subscribes():
     subscribes = Subscribe.query.all()
     for subscribe in subscribes:
         print(subscribe.user_id,subscribe.post_id,subscribe.edited)
     return "printed subscriptions in server console"
 
-@backend.route('/notifications/<int:logged_user_id>')
+@backend.route('/notifications/<int:logged_user_id>',methods=['GET'])
 def get_edited_posts(logged_user_id):
     if logged_user_id != current_user.id:
         abort(403)
@@ -309,7 +310,17 @@ def get_edited_posts(logged_user_id):
 
     return jsonify({'id_array': post_list,'result':'success'})
 
-
+@backend.route('/notification/delete', methods=['POST'])
+def remove_notification():
+    data = request.get_json()
+    if not data or 'user_id' not in data or 'post_id' not in data:
+        abort(400)
+    if data['user_id'] != current_user.id:
+        abort(403)
+    subscribe = Subscribe.query.filter_by(user_id=data['user_id'], post_id=data['post_id']).first()
+    subscribe.edited = False
+    db.session.commit()
+    return 'deleted'
 
 @backend.route('/printposts', methods=['GET'])
 def print_posts():
@@ -317,7 +328,6 @@ def print_posts():
     for post in posts:
         print(post.to_dict())
     return 'Printed posts to server console'
-    return "deleted"
 
 # error occurs when the server has internal error
 @backend.errorhandler(500)

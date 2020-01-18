@@ -221,6 +221,8 @@ def edit_user():
         return "no user"
     user.first_name = data['first_name']
     user.last_name = data['last_name']
+    user.birth_date = data['birthdate']
+    user.gender = data['gender']
     db.session.commit()
     return "edited"
 

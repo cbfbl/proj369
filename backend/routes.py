@@ -120,7 +120,6 @@ def filtered_locations():
 @backend.route('/logout',methods=['GET'])
 @login_required
 def logout():
-    print('im in logout')
     logout_user()
     return 'logged out',201
 

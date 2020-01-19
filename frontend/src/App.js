@@ -8,7 +8,7 @@ import Register from './Components/Register';
 import Profile from './Components/profile';
 import User from './Components/User';
 import Notification from './Components/Notification';
-import { NewPost, Postpage } from './Components/Post';
+import { Postpage } from './Components/Post';
 import SearchTravelers from './Components/SearchTravelers';
 
 import { Redirect } from 'react-router-dom';

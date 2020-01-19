@@ -24,7 +24,7 @@ class User(UserMixin, db.Model):
     first_name = db.Column(db.String(80))
     last_name = db.Column(db.String(80))
     birth_date = db.Column(db.String(80))
-    profile_picture = db.Column(db.String(20), nullable=False, default='default.jpg')
+    profile_picture = db.Column(db.String(120), nullable=False, default='https://i.pinimg.com/236x/cb/33/49/cb3349b86ca661ca61ae9a36d88d70d4--ash-pokemon-pokemon-games.jpg')
     posts = db.relationship('Post', lazy='dynamic')
     followed = db.relationship('Follow', foreign_keys=[Follow.follower], backref=db.backref('followed_after', lazy='joined'),
                                lazy='dynamic', cascade='all, delete-orphan')
@@ -66,7 +66,7 @@ class User(UserMixin, db.Model):
             output_following = ["User is not following anyone"]
         return {'id': self.id, 'username': self.username, 'email': self.email, 'first_name': self.first_name, \
             'last_name': self.last_name, 'gender': self.gender, 'birthdate': self.birth_date, \
-                'followers':output_followers,'following':output_following}
+                'followers':output_followers,'following':output_following,'image':self.profile_picture}
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -79,8 +79,8 @@ class Post(db.Model):
     title = db.Column(db.Text, nullable=False)
     body = db.Column(db.String)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    latitude = db.Column(db.Integer, nullable=False)
-    longitude = db.Column(db.Integer, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
     country = db.Column(db.String)
     city = db.Column(db.String)
     start_date = db.Column(db.DateTime)
@@ -89,7 +89,7 @@ class Post(db.Model):
     def to_dict(self):
         return {'id': self.id, 'user_id': self.user_id, 'title': self.title, 'body': self.body, \
              'timestamp': self.timestamp, 'latitude': self.latitude, 'longitude': self.longitude, \
-                 'city':self.city,'start_date':self.start_date,'end_date':self.end_date }
+                 'city': self.city, 'start_date': self.start_date, 'end_date': self.end_date }
 
 class Subscribe(db.Model):
     __tablename__ = 'subscribes'

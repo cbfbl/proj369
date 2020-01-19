@@ -120,7 +120,6 @@ def filtered_locations():
 @backend.route('/logout',methods=['GET'])
 @login_required
 def logout():
-    print('im in logout')
     logout_user()
     return 'logged out',201
 
@@ -220,6 +219,8 @@ def edit_user():
         return "no user"
     user.first_name = data['first_name']
     user.last_name = data['last_name']
+    user.birth_date = data['birthdate']
+    user.gender = data['gender']
     db.session.commit()
     return "edited"
 
@@ -324,7 +325,6 @@ def edit_post():
     # if not current_user.is_autenticated:
     #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
-    print(data)
     if data['current_user_id']!=current_user.id :
         raise InvalidUsage('You are Unauthorized', status_code=401)
     post = Post.query.filter_by(id=data['post_id']).first()

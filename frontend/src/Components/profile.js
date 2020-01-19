@@ -12,12 +12,15 @@ class Profile extends Component {
 		this.changeFirstName = this.changeFirstName.bind(this);
 		this.changeLastName = this.changeLastName.bind(this);
 		this.toggleEditable = this.toggleEditable.bind(this);
+		this.changeSmart = this.changeSmart.bind(this);
 	}
 	state = {
 		username: '',
 		email: '',
 		firstname: '',
 		lastname: '',
+		birthdate: '',
+		gender: '',
 		editable: 'false'
 	};
 
@@ -35,6 +38,8 @@ class Profile extends Component {
 				email: '',
 				firstname: '',
 				lastname: '',
+				gender: '',
+				image: '',
 				editable: 'false'
 			});
 		}
@@ -46,6 +51,9 @@ class Profile extends Component {
 					email: response.data.email,
 					firstname: response.data.first_name,
 					lastname: response.data.last_name,
+					birthdate: response.data.birthdate,
+					gender: response.data.gender,
+					image: '',
 					editable: 'false'
 				});
 			})
@@ -99,12 +107,18 @@ class Profile extends Component {
 		const user_id = decoded.identity.id;
 		axios.defaults.withCredentials = true;
 		axios
-			.put(flask_server_adress + '/user/edit', {
-				current_user_id: user_id,
-				username: this.state.username,
-				first_name: this.state.firstname,
-				last_name: this.state.lastname
-			}, {crossDomain: true})
+			.put(
+				flask_server_adress + '/user/edit',
+				{
+					current_user_id: user_id,
+					username: this.state.username,
+					first_name: this.state.firstname,
+					last_name: this.state.lastname,
+					birthdate: this.state.birthdate,
+					gender: this.state.gender
+				},
+				{ crossDomain: true }
+			)
 			.then((response) => {
 				if (response.data === 'edited') {
 					this.setState({
@@ -138,17 +152,37 @@ class Profile extends Component {
 			this.componentDidMount();
 		}
 	}
+	changeSmart(ev) {
+		const key_field = ev.target.name;
+		if (key_field === 'birthdate') {
+			this.setState({
+				birthdate: ev.target.value
+			});
+		} else if (key_field === 'gender') {
+			this.setState({
+				gender: ev.target.value
+			});
+		}
+	}
 	render() {
 		const editting = (
 			<div>
-				<button className="btn-success" onClick={this.editProfile}>Submit change</button>
-				<button className="btn-success" onClick={this.toggleEditable}>Cancel changes</button>
+				<button className="btn-success" onClick={this.editProfile}>
+					Submit change
+				</button>
+				<button className="btn-success" onClick={this.toggleEditable}>
+					Cancel changes
+				</button>
 			</div>
 		);
 		const not_editting = (
 			<div>
-				<button className="btn-success" onClick={this.deleteUser}>Delete account</button>
-				<button className="btn-success" onClick={this.toggleEditable}>Edit Info</button>
+				<button className="btn-success" onClick={this.deleteUser}>
+					Delete account
+				</button>
+				<button className="btn-success" onClick={this.toggleEditable}>
+					Edit Info
+				</button>
 			</div>
 		);
 		const ret_editable = (
@@ -158,6 +192,14 @@ class Profile extends Component {
 				<br />
 				<label>Last name:</label>
 				<input type="text" value={this.state.lastname} onChange={this.changeLastName} />
+				<br />
+				<label>Birthday:</label>
+				<input type="date" name="birthdate" value={this.state.birthdate} onChange={this.changeSmart} />
+				<br />
+				<label>Gender</label>
+				<br />
+				<input type="radio" name="gender" value="Male" onChange={this.changeSmart} /> Male<br />
+				<input type="radio" name="gender" value="Female" onChange={this.changeSmart} /> Female<br />
 			</div>
 		);
 		const ret = (
@@ -167,10 +209,16 @@ class Profile extends Component {
 				<br />
 				<label>Last name:</label>
 				{this.state.lastname}
+				<br />
+				<label>Birthday:</label>
+				{this.state.birthdate}
+				<br />
+				<label>Gender:</label>
+				{this.state.gender}
 			</div>
 		);
 		return (
-			<div style={{ color: 'white' }}>
+			<div style={{ color: this.state.editable === 'true' ? 'black' : 'white' }}>
 				<label>Username: </label>
 				{this.state.username}
 				<br />

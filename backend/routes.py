@@ -97,7 +97,7 @@ def travel_locations():
     for post in posts:
         start_date = post.start_date.strftime("%Y-%m-%d")
         end_date = post.end_date.strftime("%Y-%m-%d")
-        locations_list.append([post.latitude, post.longitude,start_date,end_date])
+        locations_list.append([post.latitude, post.longitude,start_date,end_date,post.title,post.body])
     return jsonpickle.encode(locations_list)
 
 
@@ -113,7 +113,7 @@ def filtered_locations():
     for post in relevant_posts:
         start_date = post.start_date.strftime("%Y-%m-%d")
         end_date = post.end_date.strftime("%Y-%m-%d")
-        locations_list.append([post.latitude, post.longitude,start_date,end_date])
+        locations_list.append([post.latitude, post.longitude,start_date,end_date,post.title,post.body])
     return jsonpickle.encode(locations_list)
 
 

@@ -57,7 +57,7 @@ def login():
         login_user(user,remember=True)
         access_token = create_access_token(identity={'id': user.id})
         return jsonify({'token' : access_token , 'result' : 'created' })
-    raise InvalidUsage('You are Unauthorized Missing data', status_code=401)
+    raise InvalidUsage('You are Unauthorized', status_code=401)
 
 
 @backend.route('/printusers',methods=['GET'])
@@ -185,7 +185,6 @@ def regipost():
 
 @backend.route("/user/<string:name>", methods=['GET'])
 def get_user_id(name):
-
     # if not current_user.is_authenticated:
         # raise InvalidUsage('You are Unauthorized', status_code=401)
     user = User.query.filter_by(username=name).first()
@@ -196,8 +195,8 @@ def get_user_id(name):
 
 @backend.route('/user/<int:user_id>',methods=['GET'])
 def get_user(user_id):
-    # if not current_user.is_authenticated:
-    #     raise InvalidUsage('You are Unauthorized', status_code=401)
+    if not current_user.is_authenticated:
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     user = User.query.filter_by(id=user_id).first()
     is_follower = Follow.query.filter_by(follower=current_user.id, followed=user_id).first()
     if not (current_user.id == user_id):
@@ -267,11 +266,8 @@ def unfollow(user_id):
 @backend.route('/post/posts/<int:post_user_id>',methods=['GET'])
 def posts(post_user_id):
     #if user_id in db
-    print(post_user_id)
     user_posts = Post.query.filter_by(user_id=post_user_id).all()
-    print(user_posts)
     following_users = Follow.query.filter_by(follower=post_user_id)
-    print(following_users)
     ret_posts = []
     for user_follower in following_users:
         current_posts = Post.query.filter_by(user_id=user_follower.followed).all()
@@ -290,14 +286,14 @@ def get_post(post_id):
 
 @backend.route('/post/new', methods=['POST'])
 def new_post():
-    # if current_user.is_authenticated:
-    #     raise InvalidUsage('You are Unauthorized', status_code=401)
+    if not current_user.is_authenticated:
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     # if not data or not 'title' in data or not 'body' in data or not 'latitude' in data \
     #         or not 'longitude' in data or not 'start_date' in data or not 'end_date' in data:
     #     abort(401)
     if data['current_user_id'] != current_user.id:
-        raise InvalidUsage('You are Unauthorized', status_code=401)
+        raise InvalidUsage('You can\'t post on behalf of another user', status_code=401)
     start_date_list = data['start_date'].split('-')
     end_date_list = data['end_date'].split('-')
     p_start_date = datetime.datetime(int(start_date_list[0]),int(start_date_list[1]),int(start_date_list[2]))
@@ -312,7 +308,7 @@ def new_post():
 
 @backend.route('/post/delete',methods=['POST'])
 def delete_post():
-    # if current_user.is_authenticated:
+    # if not current_user.is_authenticated:
     #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     if data['current_user_id']!=current_user.id:

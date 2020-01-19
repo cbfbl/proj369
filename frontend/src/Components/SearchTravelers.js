@@ -1,6 +1,6 @@
 import React ,{createRef, Component} from 'react'
 // import ReactDOM , { render } from 'react-dom';
-import { Map, Marker, TileLayer } from 'react-leaflet';
+import { Map, Marker, TileLayer, Popup } from 'react-leaflet';
 import ReactLeafletSearch from "react-leaflet-search";
 // import Search from "react-leaflet-search";
 import axios from "axios";
@@ -207,7 +207,10 @@ class SearchTravelers extends Component {
             
           {this.state.filteredLocations.map(loc =>( 
             <>
-              <Marker  position={[loc[0],loc[1]]}/>
+              <Marker  position={[loc[0],loc[1]]}>
+              <Popup>Title: {loc[4]}<br></br>
+              body: {loc[5]}</Popup>
+              </Marker>
             </>
         ))}
         </Map>

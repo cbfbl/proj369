@@ -124,10 +124,11 @@ class Login extends Component {
 								{this.state.errors.password.length > 0 && (
 									<span className="error">{this.state.errors.password}</span>
 								)}
-							</div>
-							<button type="submit" className="btn btn-lg btn-success btn-block">
+
+							<button type="submit" className="btn btn-lg btn-success btn-block mt-4">
 								Sign in
 							</button>
+							</div>
 						</form>
 					</div>
 				</div>

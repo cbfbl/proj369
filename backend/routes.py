@@ -343,7 +343,7 @@ def subscribe_post():
     if data['current_user_id']!=current_user.id :
         raise InvalidUsage('You are Unauthorized', status_code=401)
     # if post id exist
-    if Subscribe.query.filter_by(user_id=data['current_user_id'], post_id=data['subscribed_post_id']):
+    if Subscribe.query.filter_by(user_id=data['current_user_id'], post_id=data['subscribed_post_id']).first():
         return 'already subscribed'
     sub = Subscribe(user_id=data['current_user_id'], post_id=data['subscribed_post_id'],edited=False)
     db.session.add(sub)

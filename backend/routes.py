@@ -79,8 +79,8 @@ def get_users():
 
 @backend.route('/userslist',methods=['GET'])
 def get_list_users():
-    # if not current_user.is_authenticated:
-    #     raise InvalidUsage('You are Unauthorized', status_code=401)
+    if not current_user.is_authenticated:
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     users = User.query.all()
     list_users = []
     for user in users:
@@ -90,8 +90,8 @@ def get_list_users():
 
 @backend.route('/locations',methods=['GET'])
 def travel_locations():
-    # if not current_user.is_authenticated:
-    #     raise InvalidUsage('You are Unauthorized', status_code=401)
+    if not current_user.is_authenticated:
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     locations_list = []
     posts = Post.query.all()
     for post in posts:
@@ -103,8 +103,8 @@ def travel_locations():
 
 @backend.route('/filteredlocations',methods=['GET'])
 def filtered_locations():
-    # if not current_user.is_authenticated:
-    #     raise InvalidUsage('You are Unauthorized', status_code=401)
+    if not current_user.is_authenticated:
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     relevant_posts = []
     locations_list = []
     users_followed = Follow.query.filter_by(follower=current_user.id).all()
@@ -184,8 +184,6 @@ def regipost():
 
 @backend.route("/user/<string:name>", methods=['GET'])
 def get_user_id(name):
-    # if not current_user.is_authenticated:
-        # raise InvalidUsage('You are Unauthorized', status_code=401)
     user = User.query.filter_by(username=name).first()
     if not user:
         raise InvalidUsage('This page don\'t exists', status_code=404)
@@ -209,8 +207,8 @@ def get_user(user_id):
 
 @backend.route('/user/edit', methods=['PUT'])
 def edit_user():
-    # if not current_user.is_authenticated:
-    #     raise InvalidUsage('You are Unauthorized', status_code=401)
+    if not current_user.is_authenticated:
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     if data['current_user_id'] != current_user.id :
         raise InvalidUsage('You are Unauthorized', status_code=401)
@@ -224,10 +222,9 @@ def edit_user():
     db.session.commit()
     return "edited"
 
+
 @backend.route('/user/delete',methods=['POST'])
 def delete_user():
-    # if not current_user.is_authenticated:
-    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     if data['current_user_id'] != current_user.id :
         raise InvalidUsage('You are Unauthorized', status_code=401)
@@ -309,8 +306,6 @@ def new_post():
 
 @backend.route('/post/delete',methods=['POST'])
 def delete_post():
-    # if not current_user.is_authenticated:
-    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     if data['current_user_id']!=current_user.id:
         raise InvalidUsage('You are Unauthorized', status_code=401)
@@ -322,8 +317,6 @@ def delete_post():
 
 @backend.route('/post/edit', methods=['PUT'])
 def edit_post():
-    # if not current_user.is_autenticated:
-    #     raise InvalidUsage('You are Unauthorized', status_code=401)
     data = request.get_json()
     if data['current_user_id']!=current_user.id :
         raise InvalidUsage('You are Unauthorized', status_code=401)
@@ -341,13 +334,14 @@ def edit_post():
     db.session.commit()
     return 'edited'				
 
+
 @backend.route('/post/subscribe', methods=['POST'])
 def subscribe_post():
     data = request.get_json()
     if not data or 'current_user_id' not in data or 'subscribed_post_id' not in data:
-        abort(400)
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     if data['current_user_id']!=current_user.id :
-        abort(403)
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     # if post id exist
     if Subscribe.query.filter_by(user_id=data['current_user_id'], post_id=data['subscribed_post_id']):
         return 'already subscribed'
@@ -356,6 +350,7 @@ def subscribe_post():
     db.session.commit()
     return 'subscribed'		
 
+
 @backend.route('/printsubscribes',methods=['GET'])
 def print_subscribes():
     subscribes = Subscribe.query.all()
@@ -363,29 +358,31 @@ def print_subscribes():
         print(subscribe.user_id,subscribe.post_id,subscribe.edited)
     return "printed subscriptions in server console"
 
+
 @backend.route('/notifications/<int:logged_user_id>',methods=['GET'])
 def get_edited_posts(logged_user_id):
     if logged_user_id != current_user.id:
-        abort(403)
+        raise InvalidUsage('You are Unauthorized', status_code=403)
     subscribes = Subscribe.query.filter_by(user_id=logged_user_id)
     post_list = []
     for subscribe in subscribes:
         if subscribe.edited == True:
             post_list.append(subscribe.post_id)
-
     return jsonify({'id_array': post_list,'result':'success'})
+
 
 @backend.route('/notification/delete', methods=['POST'])
 def remove_notification():
     data = request.get_json()
     if not data or 'user_id' not in data or 'post_id' not in data:
-        abort(400)
+        raise InvalidUsage('You are Unauthorized', status_code=401)
     if data['user_id'] != current_user.id:
-        abort(403)
+        raise InvalidUsage('You are Unauthorized', status_code=403)
     subscribe = Subscribe.query.filter_by(user_id=data['user_id'], post_id=data['post_id']).first()
     subscribe.edited = False
     db.session.commit()
     return 'deleted'
+
 
 @backend.route('/printposts', methods=['GET'])
 def print_posts():
@@ -393,6 +390,7 @@ def print_posts():
     for post in posts:
         print(post.to_dict())
     return 'Printed posts to server console'
+
 
 @backend.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):

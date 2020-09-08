@@ -9,5 +9,7 @@ nonetheless it was fun and very eductional.
 #### notes :
 - was made with another person.
 - no prior frontend\database experience.
+- sql server and some dependencies needed to install before.
+- can use the in memory option by changing __init__.py
 #### pictures :
 - will find some hopefully

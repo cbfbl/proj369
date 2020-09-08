@@ -10,7 +10,7 @@ nonetheless it was fun and very eductional.
 - was made with another person.
 - no prior frontend\database experience.
 - sql server and some dependencies needed to install before.
-- can use the in memory option by changing __init__.py
+- can use the in memory option by changing \_\_init\_\_.py
 #### pictures :
 ![](frontend/public/resources/images/login.png?raw=true)
 ![](frontend/public/resources/images/create_user.png?raw=true)

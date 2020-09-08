@@ -12,4 +12,7 @@ nonetheless it was fun and very eductional.
 - sql server and some dependencies needed to install before.
 - can use the in memory option by changing __init__.py
 #### pictures :
-- will find some hopefully
+![](frontend/public/resources/images/login.png?raw=true)
+![](frontend/public/resources/images/create_user.png?raw=true)
+![](frontend/public/resources/images/posts_map.png?raw=true)
+
